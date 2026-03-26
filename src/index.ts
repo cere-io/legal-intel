@@ -11,6 +11,7 @@ import { CLEAN_EVIDENCE_STEPS, CLEAN_FEEDBACK } from './data/clean-scenario.js';
 import { renderLanding } from './routes/landing.js';
 import { renderDocument } from './routes/document-view.js';
 import { renderCleanOnboarding } from './routes/clean-onboarding.js';
+import { renderCleanCaseView } from './routes/clean-case-view.js';
 import { mainGraph, claimGraph } from './routes/graphs-api.js';
 import type { Event, Claim, EvidenceItem, LegalCase, ClaimWeights, SSEEvent } from './types/index.js';
 
@@ -28,6 +29,7 @@ app.get('/document', renderDocument);
 
 // === CLEAN ONBOARDING (new case experience) ===
 app.get('/clean', renderCleanOnboarding);
+app.get('/clean/case', renderCleanCaseView);
 
 // === SSE ===
 const sseClients: Set<express.Response> = new Set();

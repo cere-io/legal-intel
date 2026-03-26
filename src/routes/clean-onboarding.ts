@@ -184,6 +184,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <!-- Right: Claims -->
     <div class="panel">
       <h2>&#x2696; Claims <span class="count" id="claim-count">${cleanClaims.length}</span></h2>
+      <a href="/clean/case" id="view-dashboard-btn" style="display:${cleanClaims.length > 0 ? 'block' : 'none'};margin-bottom:12px;padding:10px 16px;background:var(--text);color:var(--bg);border-radius:8px;text-decoration:none;text-align:center;font-size:12px;font-weight:600;transition:opacity .15s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">View Case Dashboard &rarr;</a>
       <div id="claims-feed">
         ${cleanClaims.length === 0 ? `
         <div class="empty">
@@ -593,6 +594,9 @@ function updateCounts() {
   var clCount = document.querySelectorAll('.claim-card').length;
   document.getElementById('ev-count').textContent = evCount;
   document.getElementById('claim-count').textContent = clCount;
+  // Show dashboard button when claims exist
+  var dashBtn = document.getElementById('view-dashboard-btn');
+  if (dashBtn && clCount > 0) dashBtn.style.display = 'block';
 }
 
 function escHtml(s) {
