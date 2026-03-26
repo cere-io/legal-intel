@@ -93,6 +93,68 @@ app.get('/api/graph/clean', (_req, res) => {
   res.json({ nodes, links });
 });
 
+// Per-claim graph for clean namespace
+app.get('/api/graph/clean/claim/:id', (req, res) => {
+  const claimId = req.params.id;
+  const allData = dumpCubbies();
+  const claim = allData['clean/claims/' + claimId] as { id: string; title: string; strength: number; elements?: Array<{ id: string; name: string; status: string; supporting_evidence?: string[] }>; evidence_chain?: string[]; key_entities?: string[]; connected_claims?: Record<string, number> } | undefined;
+  if (!claim) return res.status(404).json({ error: 'Claim not found' });
+
+  const nodes: Array<{ id: string; label: string; type: string; status?: string; radius: number; color: string }> = [];
+  const links: Array<{ source: string; target: string; strength: number; label?: string }> = [];
+
+  // Center: claim
+  nodes.push({ id: claim.id, label: claim.title, type: 'claim', radius: 20, color: '#c47a4a' });
+
+  // Elements
+  (claim.elements || []).forEach(el => {
+    const elId = claim.id + '/el/' + el.id;
+    const color = el.status === 'proven' ? '#5a8a5e' : el.status === 'partial' ? '#c47a4a' : '#b84233';
+    nodes.push({ id: elId, label: el.name, type: 'element', status: el.status, radius: 8, color });
+    links.push({ source: claim.id, target: elId, strength: 0.7, label: el.status });
+
+    (el.supporting_evidence || []).forEach(eid => {
+      const evNodeId = 'ev/' + eid;
+      if (!nodes.find(n => n.id === evNodeId)) {
+        const ev = allData['clean/evidence/' + eid] as { title?: string } | undefined;
+        nodes.push({ id: evNodeId, label: ev?.title || eid, type: 'evidence', radius: 6, color: '#5a8a8a' });
+      }
+      links.push({ source: elId, target: evNodeId, strength: 0.5 });
+    });
+  });
+
+  // Evidence chain items not yet linked
+  (claim.evidence_chain || []).forEach(eid => {
+    const evNodeId = 'ev/' + eid;
+    if (!nodes.find(n => n.id === evNodeId)) {
+      const ev = allData['clean/evidence/' + eid] as { title?: string } | undefined;
+      nodes.push({ id: evNodeId, label: ev?.title || eid, type: 'evidence', radius: 6, color: '#5a8a8a' });
+      links.push({ source: claim.id, target: evNodeId, strength: 0.4 });
+    }
+  });
+
+  // Key entities
+  (claim.key_entities || []).slice(0, 5).forEach(entity => {
+    const entId = 'ent/' + entity.replace(/[^a-zA-Z0-9]/g, '-');
+    if (!nodes.find(n => n.id === entId)) {
+      nodes.push({ id: entId, label: entity, type: 'entity', radius: 5, color: '#7a6398' });
+      links.push({ source: claim.id, target: entId, strength: 0.3 });
+    }
+  });
+
+  // Connected claims
+  Object.entries(claim.connected_claims || {}).forEach(([connId, str]) => {
+    const conn = allData['clean/claims/' + connId] as { title?: string } | undefined;
+    if (conn) {
+      const connNodeId = 'conn/' + connId;
+      nodes.push({ id: connNodeId, label: conn.title || connId, type: 'claim', radius: 10, color: '#9a9087' });
+      links.push({ source: claim.id, target: connNodeId, strength: str as number });
+    }
+  });
+
+  res.json({ nodes, links, claim: { id: claim.id, title: claim.title, strength: claim.strength } });
+});
+
 // === CUBBY API ===
 
 app.get('/api/cubbies', (_req, res) => {

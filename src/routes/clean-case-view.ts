@@ -199,7 +199,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 
     return `
     <div class="claim-section" id="claim-${c.id}">
-      <div class="claim-header" onclick="var b=document.getElementById('body-${c.id}');var t=document.getElementById('toggle-${c.id}');b.classList.toggle('open');t.classList.toggle('open')">
+      <div class="claim-header" onclick="var b=document.getElementById('body-${c.id}');var t=document.getElementById('toggle-${c.id}');b.classList.toggle('open');t.classList.toggle('open');if(b.classList.contains('open'))renderClaimGraph('${c.id}')">
         <div class="claim-left">
           <span class="toggle" id="toggle-${c.id}">&#x25B6;</span>
           <span class="claim-title">${c.title}</span>
@@ -212,6 +212,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
       </div>
       <div class="claim-body" id="body-${c.id}">
         ${c.current_understanding ? `<div class="understanding">${c.current_understanding}</div>` : ''}
+
+        <!-- Per-claim evidence graph -->
+        <div style="margin:12px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)">Evidence Network</span>
+            <div style="display:flex;gap:6px;font-size:7px;color:var(--text3)">
+              <span style="display:flex;align-items:center;gap:2px"><span style="width:8px;height:8px;border-radius:50%;background:#c47a4a"></span>Claim</span>
+              <span style="display:flex;align-items:center;gap:2px"><span style="width:8px;height:8px;border-radius:50%;background:#5a8a5e"></span>Proven</span>
+              <span style="display:flex;align-items:center;gap:2px"><span style="width:8px;height:8px;border-radius:50%;background:#b84233"></span>Gap</span>
+              <span style="display:flex;align-items:center;gap:2px"><span style="width:8px;height:8px;border-radius:3px;background:#5a8a8a"></span>Evidence</span>
+              <span style="display:flex;align-items:center;gap:2px"><span style="width:8px;height:8px;border-radius:50%;background:#7a6398"></span>Entity</span>
+            </div>
+          </div>
+          <div id="graph-${c.id}" style="min-height:200px;background:var(--bg);border-radius:8px;border:1px solid var(--border)"></div>
+        </div>
 
         ${total > 0 ? `
         <div class="section-label" style="margin-top:16px">Legal Elements</div>
@@ -271,6 +286,61 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
+var renderedClaimGraphs = {};
+function renderClaimGraph(claimId) {
+  if (renderedClaimGraphs[claimId]) return;
+  renderedClaimGraphs[claimId] = true;
+  var container = document.getElementById('graph-' + claimId);
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#9a9087;font-size:10px">Loading graph...</div>';
+
+  fetch('/api/graph/clean/claim/' + claimId).then(function(r){ return r.json() }).then(function(data) {
+    if (!data.nodes || data.nodes.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#9a9087;font-size:10px">No graph data</div>'; return; }
+    container.innerHTML = '';
+    var w = container.clientWidth || 600;
+    var h = 220;
+    var svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+
+    var sim = d3.forceSimulation(data.nodes)
+      .force('link', d3.forceLink(data.links).id(function(d){return d.id}).distance(60).strength(0.5))
+      .force('charge', d3.forceManyBody().strength(-100))
+      .force('center', d3.forceCenter(w/2, h/2))
+      .force('collision', d3.forceCollide().radius(function(d){return d.radius + 4}));
+
+    var link = svg.append('g').selectAll('line').data(data.links).enter().append('line')
+      .attr('stroke', '#d8d0c6').attr('stroke-width', 1.5).attr('stroke-opacity', 0.5);
+
+    var node = svg.append('g').selectAll('g').data(data.nodes).enter().append('g')
+      .attr('cursor', 'pointer')
+      .call(d3.drag().on('start', function(e,d){if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y})
+        .on('drag', function(e,d){d.fx=e.x;d.fy=e.y})
+        .on('end', function(e,d){if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+
+    node.each(function(d) {
+      var el = d3.select(this);
+      if (d.type === 'evidence') {
+        el.append('rect').attr('width', d.radius*2).attr('height', d.radius*2).attr('x', -d.radius).attr('y', -d.radius)
+          .attr('rx', 2).attr('fill', d.color).attr('stroke', '#fff').attr('stroke-width', 1);
+      } else if (d.type === 'entity') {
+        el.append('polygon').attr('points', function(){var r=d.radius; return '0,'+(-r)+' '+r+',0 0,'+r+' '+(-r)+',0'})
+          .attr('fill', d.color).attr('stroke', '#fff').attr('stroke-width', 1);
+      } else {
+        el.append('circle').attr('r', d.radius).attr('fill', d.color).attr('stroke', '#fff').attr('stroke-width', 1);
+      }
+    });
+
+    node.append('text').text(function(d){return d.label.length > 18 ? d.label.slice(0,18)+'...' : d.label})
+      .attr('dy', function(d){return d.radius + 10}).attr('text-anchor', 'middle')
+      .attr('font-size', '8px').attr('fill', '#6b6259').attr('font-family', 'Inter,sans-serif');
+
+    sim.on('tick', function(){
+      link.attr('x1',function(d){return d.source.x}).attr('y1',function(d){return d.source.y})
+        .attr('x2',function(d){return d.target.x}).attr('y2',function(d){return d.target.y});
+      node.attr('transform', function(d){return 'translate('+d.x+','+d.y+')'});
+    });
+  }).catch(function(){ container.innerHTML = '<div style="text-align:center;padding:20px;color:#9a9087;font-size:10px">Graph unavailable</div>'; });
+}
+
 fetch('/api/graph/clean').then(function(r){return r.json()}).then(function(data){
   if(!data.nodes||data.nodes.length===0)return;
   var container=document.getElementById('clean-graph');
