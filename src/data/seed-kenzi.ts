@@ -1,0 +1,323 @@
+import type { Claim, EvidenceItem, LegalCase, ClaimWeights } from '../types/index.js';
+
+// === 18 CLAIMS (from Kenzi Files, with element structures) ===
+
+export const KENZI_CLAIMS: Claim[] = [
+  {
+    id: 'fabrication', title: 'Fabrication of Credentials and Identity', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Material Misrepresentation', description: 'Fake Columbia, Wharton, a16z GP titles', status: 'proven', supporting_evidence: ['qri-report-3'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'scienter', name: 'Scienter', description: 'Paid for Wikitia page with fabricated citations', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'connection', name: 'Connection to Securities', description: 'Used fake credentials to gain trust for fundraising', status: 'proven', supporting_evidence: ['qri-report-1'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'reliance', name: 'Reliance', description: 'Cere relied on credentials for co-founder role', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'damages', name: 'Damages', description: '$198M market cap loss quantified', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+    ],
+    connected_claims: { 'aliases': 0.92, 'broker-dealer': 0.85 }, evidence_chain: ['qri-report-1', 'qri-report-3', 'kenzi-files-pdf'],
+    strength: 0.88, key_entities: ['Kenzi Wang', 'Columbia University', 'Wharton', 'Wikitia'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Kenzi fabricated his entire professional identity — fake Ivy League degrees, fake VC titles, paid Wikipedia-lookalike page with fabricated citations. National Student Clearinghouse confirmed no Columbia record. Verified: attended UNLV only.',
+    evolution_log: [{ date: '2023-11-17', delta: 'QRI Third Report confirms fake Columbia/Wharton via Emmie Chang and Alex Gold' }, { date: '2026-02-01', delta: 'Definitive Investigation documents Wikitia paid page with 5 fabricated citations' }],
+    created_at: '2023-09-22', updated_at: '2026-03-23',
+  },
+  {
+    id: 'grand-theft', title: 'Grand Theft Conviction and Criminal History', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Position of Trust', description: 'Employee at HBUS (Huobi US)', status: 'proven', supporting_evidence: ['qri-report-1'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Property Taken', description: 'Stole company laptop with passwords and IP', status: 'proven', supporting_evidence: ['qri-report-1'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Conversion', description: 'Refused to return laptop', status: 'proven', supporting_evidence: ['qri-report-1'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent', name: 'Intent', description: 'Case No. 18017577, 487(a) felony charge', status: 'proven', supporting_evidence: ['qri-report-1'], contradicting_evidence: [], strength: 0.95 },
+    ],
+    connected_claims: { 'embezzlement': 0.80 }, evidence_chain: ['qri-report-1'],
+    strength: 0.95, key_entities: ['Kenzi Wang', 'HBUS'], jurisdictions: ['NDCA'],
+    current_understanding: 'Kenzi was charged with Grand Theft (487(a) felony) in SFSC Case 18017577 for stealing a company laptop from HBUS. HBUS CEO: "We had to file a criminal complaint to get our stolen laptop back with passwords and IP."',
+    evolution_log: [{ date: '2023-09-22', delta: 'QRI Report confirms grand theft charge and court records' }],
+    created_at: '2023-09-22', updated_at: '2023-09-22',
+  },
+  {
+    id: 'aliases', title: 'False Identities and Aliases', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Material Misrepresentation', description: '8+ documented aliases across platforms', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'scienter', name: 'Scienter', description: 'Deliberate identity fabrication to evade accountability', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'connection', name: 'Connection to Securities', description: 'Used aliases for token allocations and Republic whitelist', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'reliance', name: 'Reliance', description: 'Investors and platforms relied on false identities', status: 'partial', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], gap_description: 'Need specific investor testimony on reliance', strength: 0.60 },
+      { id: 'damages', name: 'Damages', description: 'Token allocation theft via aliases', status: 'partial', supporting_evidence: [], contradicting_evidence: [], gap_description: 'Quantify damages from alias-enabled theft', strength: 0.50 },
+    ],
+    connected_claims: { 'fabrication': 0.92, 'vivian-theft': 0.75, 'syndicate': 0.80 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.76, key_entities: ['Kenzi Wang', 'Miles Archer', 'Kenzi Nakamura', '@0xkenzi', 'Anete Vancane', 'Ye Minzhi'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Kenzi operates under 8+ aliases: Miles Archer (@miles_archer on Telegram), Kenzi Nakamura (@kenzinak on X), GPTAutist, @macrokenzi, @0xkenzi. Used ex-girlfriend and mother\'s accounts for token allocations. Controls 6+ domains including fraudulent cerenetwork.io.',
+    evolution_log: [{ date: '2026-02-01', delta: 'Definitive Investigation catalogs all known aliases and domains' }],
+    created_at: '2026-02-01', updated_at: '2026-02-01',
+  },
+  {
+    id: 'market-manipulation', title: 'Illegal Market Manipulation (Nov 2021)', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Scheme to Defraud', description: 'Coordinated pump-and-dump with Kevin Xu', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'scienter', name: 'Scienter', description: '"Just pretend you didn\'t see it. They are dumb."', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'connection', name: 'Connection to Securities', description: 'CERE tokens on public exchanges', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'reliance', name: 'Market Reliance', description: 'Investors relied on manipulated market signals', status: 'partial', supporting_evidence: [], contradicting_evidence: [], gap_description: 'Need investor class testimony', strength: 0.55 },
+      { id: 'damages', name: 'Damages', description: '$198M market cap destruction', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+    ],
+    connected_claims: { 'syndicate': 0.90, 'ponzi-laundering': 0.70 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.83, key_entities: ['Kenzi Wang', 'Kevin Xu', 'Mike Chen', 'Sandeep Nailwal'], jurisdictions: ['NDCA'],
+    current_understanding: 'Kenzi and Kevin Xu executed a coordinated pump-and-dump on CERE tokens. During "Pump" phase: inflated price via market-making. During "Dump": liquidated while spreading FUD. Facebook screenshots document coordination with market maker Mike Chen and Polygon founder Sandeep Nailwal.',
+    evolution_log: [{ date: '2026-03-23', delta: 'Kenzi Files master document compiled with Facebook Messenger evidence' }],
+    created_at: '2026-02-01', updated_at: '2026-03-23',
+  },
+  {
+    id: 'confrontation', title: 'CEO Confrontation Confirms Fraud', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Fiduciary Duty', description: 'Co-founder entrusted with $3M stablecoins', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Property Identified', description: '$3M in stablecoins', status: 'proven', supporting_evidence: ['dhty-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Fraudulent Conversion', description: 'Transferred to personal Binance wallet, fabricated Black Swan story', status: 'proven', supporting_evidence: ['dhty-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent', name: 'Intent', description: 'Initially acknowledged having funds, then changed story', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'confession': 0.95, 'embezzlement': 0.90, 'board-investigation': 0.85 }, evidence_chain: ['kenzi-files-pdf', 'dhty-report'],
+    strength: 0.94, key_entities: ['Kenzi Wang', 'Fred Jin', 'Convex Finance'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'CEO confronted Kenzi about missing $3M. Kenzi initially acknowledged having funds, then fabricated "Black Swan" Convex Finance loss story. DHTY forensics: no on-chain evidence of Convex. Funds traced to personal Binance wallet.',
+    evolution_log: [{ date: '2024-02-28', delta: 'DHTY report disproves Black Swan narrative — no Convex Finance activity found' }],
+    created_at: '2023-05-19', updated_at: '2024-02-28',
+  },
+  {
+    id: 'intimidation', title: 'Intimidation, Threats and Coercion', template_id: 'extortion-coercion',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'threat', name: 'Threat', description: '8-month harassment campaign, threats to "blow everything up"', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent_obtain', name: 'Intent to Obtain', description: 'Demanded $2.5M in tokens and equity', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'causation', name: 'Causation', description: 'CEO signed Term Sheet under duress to stop harassment', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'term-sheet': 0.95, 'confession': 0.80, 'digital-seizure': 0.75 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.93, key_entities: ['Kenzi Wang', 'Fred Jin', 'Sandeep Nailwal'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Eight-month psychological harassment campaign (Jan-Sep 2022). Facebook screenshots: "blow everything up," "delete all files." Invoked Polygon\'s Nailwal as leverage. Demanded $2.5M.',
+    evolution_log: [{ date: '2026-03-23', delta: 'Facebook Messenger screenshots compiled as exhibits' }],
+    created_at: '2023-05-19', updated_at: '2026-03-23',
+  },
+  {
+    id: 'term-sheet', title: 'Term Sheet Signed Under Duress', template_id: 'extortion-coercion',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'threat', name: 'Sustained Coercion', description: 'Eight months of threats preceding signing', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'intent_obtain', name: 'Intent', description: '$2.49M + 18.8% equity + 861M CERE tokens', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'causation', name: 'Causation', description: 'CEO signed as means of escape, not voluntary agreement', status: 'partial', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], gap_description: 'Defense may argue voluntary signing', strength: 0.70 },
+    ],
+    connected_claims: { 'intimidation': 0.95, 'confession': 0.95 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.85, key_entities: ['Kenzi Wang', 'Fred Jin'], jurisdictions: ['NDCA', 'Delaware'],
+    current_understanding: 'CEO signed September 2022 Term Sheet under sustained coercion. Kenzi never fulfilled any obligations. Granted $2.49M + 18.8% equity + 861M CERE tokens. Two legal theories void it: (a) duress, (b) total non-performance.',
+    evolution_log: [{ date: '2023-05-19', delta: 'Original complaint filed citing duress' }],
+    created_at: '2023-05-19', updated_at: '2023-05-19',
+  },
+  {
+    id: 'confession', title: 'Term Sheet = Written Confession of Theft', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Fiduciary Position', description: 'Co-founder entrusted with treasury', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Property Identified', description: '$3M stablecoins — Item 1 of Term Sheet', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.97 },
+      { id: 'conversion', name: 'Written Admission', description: 'Term Sheet Item 1 codifies taking of $3M', status: 'proven', supporting_evidence: ['kenzi-files-pdf', 'dhty-report'], contradicting_evidence: [], strength: 0.97 },
+      { id: 'intent', name: 'Premeditation', description: 'Could not provide on-chain evidence of claimed loss', status: 'proven', supporting_evidence: ['dhty-report'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'confrontation': 0.95, 'term-sheet': 0.95, 'embezzlement': 0.90 }, evidence_chain: ['kenzi-files-pdf', 'dhty-report'],
+    strength: 0.95, key_entities: ['Kenzi Wang'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'The Term Sheet IS Kenzi\'s written confession. Item 1 admits taking $3M stablecoins. He codified the "Black Swan" narrative but could not provide on-chain proof. DHTY confirmed no Convex Finance activity. The instrument was used for self-enrichment.',
+    evolution_log: [{ date: '2024-02-28', delta: 'DHTY forensics confirm confession: no Black Swan evidence on-chain' }],
+    created_at: '2023-05-19', updated_at: '2024-02-28',
+  },
+  {
+    id: 'board-investigation', title: 'Board Investigation Confirms Theft', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Brad Bao',
+    elements: [
+      { id: 'fiduciary', name: 'Fiduciary Position', description: 'Co-founder managing investor funds', status: 'proven', supporting_evidence: ['practus-report', 'ascent-audit'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Property Diverted', description: '$4.15M from 79 investors + $3M stablecoins', status: 'proven', supporting_evidence: ['ascent-audit', 'dhty-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Confirmed by Independent Auditors', description: 'Ascent, DHTY, and Practus all confirm theft', status: 'proven', supporting_evidence: ['ascent-audit', 'dhty-report', 'practus-report'], contradicting_evidence: [], strength: 0.97 },
+      { id: 'intent', name: 'Shadow Ledger', description: 'Maintained separate "Token Raise Tracker"', status: 'proven', supporting_evidence: ['ascent-audit'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'embezzlement': 0.95, 'confrontation': 0.85, 'confession': 0.85 }, evidence_chain: ['ascent-audit', 'dhty-report', 'practus-report'],
+    strength: 0.94, key_entities: ['Brad Bao', 'Francois Granada', 'Practus LLP', 'Ascent Fund Services', 'DHTY'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Independent directors Brad Bao and Francois Granada launched forensic investigations. Three independent reports confirm theft: Ascent ($4.15M diverted, shadow ledger), DHTY ($4,432,400 to personal wallets), Practus (concluded Kenzi stole stablecoins).',
+    evolution_log: [
+      { date: '2023-12-01', delta: 'Ascent Fund Services: shadow ledger, $4.15M diverted from 79 investors' },
+      { date: '2024-02-28', delta: 'DHTY: $4,432,400 confirmed diverted to personal wallets' },
+      { date: '2024-11-07', delta: 'Practus LLP: concluded Kenzi stole the stablecoins' },
+    ],
+    created_at: '2023-12-01', updated_at: '2024-11-07',
+  },
+  {
+    id: 'embezzlement', title: 'Embezzlement of Investor Funds ($4.87M)', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Sole Intermediary', description: 'Kenzi was sole intermediary for fundraising', status: 'proven', supporting_evidence: ['ascent-audit'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Investor Funds', description: 'Private Round short $3.64M, Influencer Round short $378K', status: 'proven', supporting_evidence: ['ascent-audit', 'dhty-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Diverted to Personal Wallets', description: 'Funds traced to Kenzi-controlled wallets', status: 'proven', supporting_evidence: ['dhty-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent', name: 'Shadow Tracker', description: 'Maintained separate spreadsheet to track diversions', status: 'proven', supporting_evidence: ['ascent-audit'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'board-investigation': 0.95, 'confession': 0.90, 'vivian-theft': 0.85 }, evidence_chain: ['ascent-audit', 'dhty-report'],
+    strength: 0.94, key_entities: ['Kenzi Wang'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Kenzi diverted $4.87M+ from 79 investors. Private Round short $3,641,400, Influencer Round short $378,000+. All traced to Kenzi-controlled wallets. Many "investors" who benefited were co-conspirators.',
+    evolution_log: [
+      { date: '2023-12-01', delta: 'Ascent: Seed/Strategic accounted for; Private/Influencer rounds short' },
+      { date: '2024-02-28', delta: 'DHTY: $4,432,400 confirmed diverted' },
+    ],
+    created_at: '2023-12-01', updated_at: '2024-02-28',
+  },
+  {
+    id: 'evidence-destruction', title: 'Intentional Destruction of Evidence', template_id: 'evidence-destruction',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'duty', name: 'Duty to Preserve', description: 'Litigation anticipated — original complaint filed May 2023', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'destruction', name: 'Intentional Destruction', description: 'Deleted Telegram/Facebook messages, revoked Token Sale Tracker access, deleted Drive docs', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'relevance', name: 'Relevance', description: 'Deleted messages about pump-and-dump coordination', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+    ],
+    connected_claims: { 'market-manipulation': 0.80, 'digital-seizure': 0.75 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.88, key_entities: ['Kenzi Wang'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Kenzi systematically deleted incriminating Telegram and Facebook messages about pump-and-dump. Revoked Token Sale Tracker access. Deleted corporate documents from shared drives. Then launched psychological assault to distract.',
+    evolution_log: [{ date: '2026-03-23', delta: 'Master document compiled with evidence of deletions' }],
+    created_at: '2023-05-19', updated_at: '2026-03-23',
+  },
+  {
+    id: 'digital-seizure', title: 'Seizure of Corporate Digital Assets', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Custodian of Corporate Assets', description: 'Had admin access to Twitter/X and Telegram', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'property', name: 'Corporate Assets Seized', description: '105K-follower Twitter, 75K-member Telegram, all exchange channels', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Hostile Takeover', description: 'Removed all admins, changed passwords, redirected followers', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent', name: 'Deliberate Seizure', description: 'Created fraudulent cerenetwork.io and cerenetworkvictims.com', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'evidence-destruction': 0.75, 'intimidation': 0.70 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.94, key_entities: ['Kenzi Wang', '@cerenetwork', 'Martijn Broersma', 'Fred Jin'], jurisdictions: ['Dubai'],
+    current_understanding: 'Kenzi seized @cerenetwork Twitter (105K followers) and 75K-member Telegram. Removed Fred Jin and Martijn Broersma as admins. Created fraudulent cerenetwork.io. Damages quantified at $198M in Financial Substantiation Report.',
+    evolution_log: [{ date: '2023-09-22', delta: 'Twitter fully locked out' }, { date: '2023-12-21', delta: 'cerenetwork.io and cerenetworkvictims.com created' }],
+    created_at: '2023-09-22', updated_at: '2023-12-21',
+  },
+  {
+    id: 'ponzi-laundering', title: 'Ponzi-Style Money Laundering (Symbolic Capital)', template_id: 'money-laundering',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'proceeds', name: 'Proceeds of Crime', description: 'Stolen funds from Cere, RAZE, and other victims', status: 'proven', supporting_evidence: ['big-report', 'kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'transaction', name: 'Financial Transaction', description: 'Founded $50M Symbolic Ventures with Sandeep Nailwal', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'knowledge', name: 'Knowledge', description: 'Kenzi knew funds were stolen — he stole them', status: 'partial', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], gap_description: 'Need to prove Nailwal knew about stolen source funds', strength: 0.70 },
+    ],
+    connected_claims: { 'syndicate': 0.90, 'market-manipulation': 0.70, 'vivian-theft': 0.75 }, evidence_chain: ['big-report', 'kenzi-files-pdf'],
+    strength: 0.80, key_entities: ['Kenzi Wang', 'Sandeep Nailwal', 'Sachi Kamiya', 'Symbolic Ventures', 'AU21 Capital'], jurisdictions: ['NDCA', 'Dubai'],
+    current_understanding: 'Stolen proceeds routed to fund Symbolic Ventures ($50M unregistered fund) with Polygon\'s Nailwal. Kenzi married Sachi Kamiya (Director at Sentient, VP at Symbolic). Closed-loop self-dealing. Neither Symbolic nor AU21 registered with SEC/FINRA.',
+    evolution_log: [{ date: '2026-02-01', delta: 'Definitive Investigation maps the Symbolic Capital laundering structure' }],
+    created_at: '2026-02-01', updated_at: '2026-02-01',
+  },
+  {
+    id: 'vivian-theft', title: 'Vivian Liu Token Theft (33.3M CERE)', template_id: 'embezzlement',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'fiduciary', name: 'Exclusive Communicator', description: 'Kenzi volunteered to manage Vivian\'s account', status: 'partial', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], gap_description: 'Need the exact Slack screenshot of Kenzi taking over Vivian communication (Dec 23, 2021)', strength: 0.75 },
+      { id: 'property', name: 'Tokens Identified', description: '33.3M CERE tokens in two tranches', status: 'proven', supporting_evidence: ['big-report', 'kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'conversion', name: 'Wallet Substitution + Bridge + Dump', description: 'Replaced wallet address, bridged Polygon→Ethereum→KuCoin in 24h', status: 'proven', supporting_evidence: ['big-report'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'intent', name: 'Premeditated', description: '19-month dormancy then rapid liquidation pattern', status: 'proven', supporting_evidence: ['big-report'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'syndicate': 0.92, 'embezzlement': 0.85, 'ponzi-laundering': 0.75 }, evidence_chain: ['big-report', 'kenzi-files-pdf'],
+    strength: 0.89, key_entities: ['Kenzi Wang', 'Vivian Liu', 'Goopal Digital Limited', '0xb08f...'], jurisdictions: ['NDCA', 'Dubai', 'BVI'],
+    current_understanding: 'Kenzi stole 33.3M CERE tokens from investor Vivian Liu by replacing her wallet address ("Deleted User" in edit history). After 19 months dormancy, bridged to Polygon→Ethereum→KuCoin in 24h. Same bridge wallet received 30.6M RAZE + 5.3M SKYRIM 3 days later.',
+    evolution_log: [
+      { date: '2026-02-13', delta: 'BIG report connects bridge wallet to CERE, RAZE, and SKYRIM theft' },
+      { date: '2026-03-23', delta: 'Master evidence document compiled' },
+    ],
+    created_at: '2026-02-13', updated_at: '2026-03-23',
+  },
+  {
+    id: 'syndicate', title: 'Digital Crime Syndicate Collaboration', template_id: 'crypto-fraud-rico',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'enterprise', name: 'Enterprise', description: 'Distributed syndicate across SF, Dubai, Beijing, Singapore', status: 'proven', supporting_evidence: ['kenzi-files-pdf', 'qri-report-3'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'pattern', name: 'Pattern (Predicate Acts)', description: '6 documented predicate acts across multiple victims', status: 'proven', supporting_evidence: ['kenzi-files-pdf', 'big-report', 'qri-report-3'], contradicting_evidence: [], strength: 0.88 },
+      { id: 'conduct', name: 'Conduct Through Enterprise', description: 'Each conspirator serves a specific function', status: 'partial', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], gap_description: 'Need testimony directly linking Kenzi to each conspirator\'s role', strength: 0.65 },
+      { id: 'injury', name: 'Injury', description: 'Multiple victims, $58M+ in aggregate claims', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+    ],
+    connected_claims: { 'vivian-theft': 0.92, 'market-manipulation': 0.90, 'ponzi-laundering': 0.90, 'broker-dealer': 0.80 }, evidence_chain: ['kenzi-files-pdf', 'big-report', 'qri-report-3'],
+    strength: 0.82, key_entities: ['Kenzi Wang', 'Kevin Xu', 'Vivian Liu', 'Chandler Guo', 'Sandeep Nailwal', 'Josef Qu', 'Kevin Ding'], jurisdictions: ['NDCA', 'Dubai', 'BVI', 'Delaware'],
+    current_understanding: 'Distributed syndicate: Vivian Liu weaponized as plaintiff, Kevin Xu dumped 50M tokens, Chandler Guo liquidated through Gate.io, Nailwal co-founded Symbolic, "Josef Qu" is fabricated KYC managed by Kevin Ding.',
+    evolution_log: [
+      { date: '2023-11-17', delta: 'QRI Third Report identifies multiple victim pattern' },
+      { date: '2026-02-13', delta: 'BIG report connects bridge wallet across CERE/RAZE/SKYRIM' },
+    ],
+    created_at: '2023-11-17', updated_at: '2026-02-13',
+  },
+  {
+    id: 'broker-dealer', title: 'Unlicensed Broker-Dealer Activity (SEC)', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Broker-Dealer Activity', description: 'Facilitated $26.3M+ in Reg D securities sales', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.90 },
+      { id: 'scienter', name: 'Scienter', description: 'AU21 and Beacon explicitly advertise transaction-based compensation', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'connection', name: 'Connection to Securities', description: 'Reg D 506(c) offering via Republic (SEC-registered)', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.95 },
+      { id: 'reliance', name: 'Reliance', description: '2,526 accredited investors relied on Republic listing', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'damages', name: 'Damages', description: 'Investor losses from token price collapse', status: 'partial', supporting_evidence: [], contradicting_evidence: [], gap_description: 'Need aggregate investor loss calculation', strength: 0.60 },
+    ],
+    connected_claims: { 'fabrication': 0.85, 'syndicate': 0.80 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.83, key_entities: ['Kenzi Wang', 'AU21 Capital', 'Beacon Accelerator', 'Republic', 'Dylan Dewdney'], jurisdictions: ['NDCA'],
+    current_understanding: 'Kenzi facilitated sale of Reg D securities ($26.3M from 2,526 investors on Republic) without broker-dealer registration, violating 15 USC 78o. Dylan Dewdney prepared to testify Kenzi positioned himself as licensed fundraiser.',
+    evolution_log: [{ date: '2026-02-01', delta: 'Definitive Investigation compiles broker-dealer evidence' }],
+    created_at: '2026-02-01', updated_at: '2026-02-01',
+  },
+  // Remaining claims with lighter element detail
+  {
+    id: 'taint', title: 'Reputational Taint by Association', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Public Fraud Allegations', description: 'ZachXBT callout, Kylin accusations', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'scienter', name: 'Kenzi Awareness', description: 'Continued association despite known fraud history', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+      { id: 'connection', name: 'Connection', description: '$3M Symbolic Ventures stablecoin unreturned', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+      { id: 'reliance', name: 'Reliance', description: 'Cere community relied on Kenzi\'s public persona', status: 'partial', supporting_evidence: [], contradicting_evidence: [], strength: 0.60 },
+      { id: 'damages', name: 'Damages', description: 'Reputational damage to Cere Network', status: 'partial', supporting_evidence: [], contradicting_evidence: [], strength: 0.55 },
+    ],
+    connected_claims: { 'fabrication': 0.70, 'digital-seizure': 0.65 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.72, key_entities: ['ZachXBT', 'Kenzi Wang'], jurisdictions: ['NDCA'],
+    current_understanding: 'ZachXBT publicly called out Kenzi Jan 2022. Kylin Network accusations surfaced. $3M Symbolic Ventures stablecoin unreturned. Public taint endangered Cere Network.',
+    evolution_log: [{ date: '2022-01-01', delta: 'ZachXBT public callout' }],
+    created_at: '2022-01-01', updated_at: '2022-01-01',
+  },
+  {
+    id: 'reputation', title: 'Reputational Taint and Disassociation', template_id: 'securities-fraud',
+    status: 'active', proposed_by: 'attorney', confirmed_by: 'Rocky Lee',
+    elements: [
+      { id: 'material_misrep', name: 'Cascading Falsification', description: 'Kenzi\'s web of lies endangered Cere', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+      { id: 'scienter', name: 'Deliberate', description: 'Kenzi knew his credentials were fabricated', status: 'proven', supporting_evidence: ['qri-report-3'], contradicting_evidence: [], strength: 0.85 },
+      { id: 'connection', name: 'Connection', description: 'Cere hired Wayfair LLP to sever ties', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+      { id: 'reliance', name: 'Reliance', description: 'Company relied on Kenzi\'s representations', status: 'proven', supporting_evidence: ['kenzi-files-pdf'], contradicting_evidence: [], strength: 0.80 },
+      { id: 'damages', name: 'Damages', description: 'Legal fees, lost partnerships, token price impact', status: 'partial', supporting_evidence: [], contradicting_evidence: [], gap_description: 'Need detailed cost accounting', strength: 0.55 },
+    ],
+    connected_claims: { 'fabrication': 0.85, 'taint': 0.90 }, evidence_chain: ['kenzi-files-pdf'],
+    strength: 0.76, key_entities: ['Kenzi Wang', 'Wayfair LLP'], jurisdictions: ['NDCA'],
+    current_understanding: 'Cere engaged Wayfair LLP to formally sever ties with Kenzi after discovering the depth of his fabrications.',
+    evolution_log: [{ date: '2022-06-01', delta: 'Wayfair LLP engaged to clean up Kenzi association' }],
+    created_at: '2022-06-01', updated_at: '2022-06-01',
+  },
+];
+
+// === 8 EVIDENCE ITEMS ===
+
+export const KENZI_EVIDENCE: EvidenceItem[] = [
+  { id: 'dhty-report', type: 'report', title: 'DHTY Forensic Report', source: 'DHTY', source_credibility: 10, content_hash: 'sha256:dhty2024', jurisdictions: ['NDCA', 'Dubai'], entities: ['Kenzi Wang', 'Convex Finance', 'Binance'], urgency: 8, claims_implicated: [{ claim_id: 'confrontation', relevance: 0.95, reasoning: 'Disproves Black Swan — no Convex activity' }, { claim_id: 'embezzlement', relevance: 0.95, reasoning: 'Confirms $4,432,400 diverted' }, { claim_id: 'confession', relevance: 0.90, reasoning: 'Corroborates Term Sheet Item 1 admission' }, { claim_id: 'board-investigation', relevance: 0.90, reasoning: 'One of three independent audits confirming theft' }], extracted_at: '2024-02-28' },
+  { id: 'practus-report', type: 'report', title: 'Practus LLP Investigation', source: 'Practus LLP', source_credibility: 10, content_hash: 'sha256:practus2024', jurisdictions: ['NDCA'], entities: ['Kenzi Wang', 'Vivian Liu'], urgency: 8, claims_implicated: [{ claim_id: 'board-investigation', relevance: 0.95, reasoning: 'Outside counsel concluded Kenzi stole stablecoins' }, { claim_id: 'vivian-theft', relevance: 0.80, reasoning: 'Discovered securities theft from investors' }], extracted_at: '2024-11-07' },
+  { id: 'ascent-audit', type: 'report', title: 'Ascent Fund Services Audit', source: 'Ascent Fund Services', source_credibility: 10, content_hash: 'sha256:ascent2023', jurisdictions: ['NDCA'], entities: ['Kenzi Wang'], urgency: 8, claims_implicated: [{ claim_id: 'embezzlement', relevance: 0.95, reasoning: 'Shadow ledger, $4.15M diverted from 79 investors' }, { claim_id: 'board-investigation', relevance: 0.95, reasoning: 'Independent third-party audit' }], extracted_at: '2023-12-01' },
+  { id: 'big-report', type: 'report', title: 'BIG Forensic Report — Vivian Liu Wallets', source: 'Blockchain Intelligence Group', source_credibility: 10, content_hash: 'sha256:big2026', jurisdictions: ['NDCA', 'Dubai'], entities: ['Kenzi Wang', 'Vivian Liu', '0xb08f', 'Gate.io'], urgency: 9, claims_implicated: [{ claim_id: 'vivian-theft', relevance: 0.97, reasoning: 'Bridge wallet connects CERE, RAZE, SKYRIM theft' }, { claim_id: 'syndicate', relevance: 0.90, reasoning: 'Same wallet used across multiple victim thefts' }, { claim_id: 'ponzi-laundering', relevance: 0.85, reasoning: 'Funds routed through Gate.io' }], extracted_at: '2026-02-13' },
+  { id: 'qri-report-1', type: 'report', title: 'QRI Investigation Report', source: 'QRI', source_credibility: 9, content_hash: 'sha256:qri1', jurisdictions: ['NDCA'], entities: ['Kenzi Wang', 'Vijay Garg'], urgency: 7, claims_implicated: [{ claim_id: 'grand-theft', relevance: 0.95, reasoning: 'Confirms grand theft charge Case 18017577' }, { claim_id: 'fabrication', relevance: 0.80, reasoning: 'Employment history fabricated' }], extracted_at: '2023-09-22' },
+  { id: 'qri-report-2', type: 'report', title: 'QRI Second Report', source: 'QRI', source_credibility: 9, content_hash: 'sha256:qri2', jurisdictions: ['NDCA'], entities: ['Kenzi Wang', 'Traction Corp'], urgency: 6, claims_implicated: [{ claim_id: 'grand-theft', relevance: 0.70, reasoning: 'Domain squatting bad faith finding' }], extracted_at: '2023-10-05' },
+  { id: 'qri-report-3', type: 'report', title: 'QRI Third Report', source: 'QRI', source_credibility: 9, content_hash: 'sha256:qri3', jurisdictions: ['NDCA'], entities: ['Kenzi Wang', 'Emmie Chang', 'Vijay Garg', 'Alex Gold'], urgency: 8, claims_implicated: [{ claim_id: 'fabrication', relevance: 0.95, reasoning: 'Emmie Chang: fake Columbia/Wharton confirmed' }, { claim_id: 'syndicate', relevance: 0.80, reasoning: 'Multiple victims describe same pattern' }], extracted_at: '2023-11-17' },
+  { id: 'kenzi-files-pdf', type: 'filing', title: 'Kenzi Files — Definitive Story (All in One)', source: 'Internal compilation', source_credibility: 8, content_hash: 'sha256:kenzifiles2026', jurisdictions: ['NDCA', 'Dubai', 'Delaware', 'BVI'], entities: ['Kenzi Wang', 'Fred Jin', 'Vivian Liu', 'Dylan Dewdney', 'Vijay Garg'], urgency: 10, claims_implicated: [{ claim_id: 'syndicate', relevance: 0.95, reasoning: 'Comprehensive 18-crime master document' }], extracted_at: '2026-03-23' },
+];
+
+// === 7 CASES ===
+
+export const KENZI_CASES: LegalCase[] = [
+  { id: 'cere-v-wang', case_number: '3:23-cv-2444', short_name: 'Cere v. Wang', jurisdiction: 'NDCA', court: 'N.D. California', filed_date: '2023-05-19', status: 'active', case_type: 'civil', next_deadline: '2026-04-15', next_deadline_desc: 'Discovery deadline', connected_claims: ['embezzlement', 'confrontation', 'confession', 'board-investigation'], participants: [{ name: 'Rocky Lee', role: 'lead_counsel', firm: 'Milliard Law' }, { name: 'Matt Miller', role: 'litigation_counsel', firm: 'Hanson Bridgett' }, { name: 'Susanna Chenette', role: 'litigation_counsel', firm: 'Hanson Bridgett' }, { name: 'Fred Jin', role: 'plaintiff' }, { name: 'Kenzi Wang', role: 'defendant' }] },
+  { id: 'goopal-v-jin', case_number: '3:26-cv-00857', short_name: 'Goopal v. Jin', jurisdiction: 'NDCA', court: 'N.D. California', filed_date: '2026-01-27', status: 'active', case_type: 'civil', next_deadline: '2026-03-28', next_deadline_desc: 'Amended complaint expected from opposing counsel', connected_claims: ['vivian-theft', 'syndicate', 'aliases'], participants: [{ name: 'Rocky Lee', role: 'defense_coordinator', firm: 'Milliard Law' }, { name: 'Susanna Chenette', role: 'defense_counsel', firm: 'Hanson Bridgett' }, { name: 'Fred Jin', role: 'defendant' }, { name: 'Brad Bao', role: 'defendant' }, { name: 'Vivian Liu', role: 'plaintiff' }] },
+  { id: 'interdata-v-wang', case_number: '3:25-cv-03798-JD', short_name: 'Interdata v. Wang', jurisdiction: 'NDCA', court: 'N.D. California', filed_date: '2025-01-01', status: 'active', case_type: 'civil', next_deadline: '2026-04-01', next_deadline_desc: 'Motion to dismiss response', connected_claims: ['embezzlement', 'broker-dealer'], participants: [{ name: 'Matt Miller', role: 'litigation_counsel', firm: 'Hanson Bridgett' }] },
+  { id: 'qu-v-jin', case_number: 'QU-3:26-cv-NDCA', short_name: 'Qu v. Jin', jurisdiction: 'NDCA', court: 'N.D. California', filed_date: '2026-02-01', status: 'active', case_type: 'civil', next_deadline: '2026-04-05', next_deadline_desc: 'Motion to dismiss deadline', connected_claims: ['syndicate', 'aliases'], participants: [{ name: 'Susanna Chenette', role: 'defense_counsel', firm: 'Hanson Bridgett' }, { name: 'Fred Jin', role: 'defendant' }, { name: 'Brad Bao', role: 'defendant' }] },
+  { id: 'wang-v-cerebellum', case_number: 'WANG-DE-2026', short_name: 'Wang v. Cerebellum', jurisdiction: 'Delaware', court: 'Delaware Court of Chancery', filed_date: '2026-01-13', status: 'active', case_type: 'civil', next_deadline: '2026-04-10', next_deadline_desc: 'Response to complaint', connected_claims: ['term-sheet', 'confession'], participants: [{ name: 'Rocky Lee', role: 'defense_coordinator', firm: 'Milliard Law' }, { name: 'Kenzi Wang', role: 'plaintiff' }] },
+  { id: 'dubai-criminal-1', case_number: 'DUBAI-31801/2025', short_name: 'Dubai Criminal I', jurisdiction: 'Dubai', court: 'Dubai Criminal Court', filed_date: '2025-07-07', status: 'active', case_type: 'criminal', next_deadline: '2026-04-20', next_deadline_desc: 'Prosecution hearing', connected_claims: ['intimidation', 'digital-seizure', 'evidence-destruction'], participants: [{ name: 'Tarek Saad', role: 'local_counsel', firm: 'BLK Partners' }, { name: 'Ahmed ElSayed', role: 'local_counsel', firm: 'BLK Partners' }, { name: 'Kenzi Wang', role: 'defendant' }] },
+  { id: 'dubai-criminal-2', case_number: 'DUBAI-33359/2025', short_name: 'Dubai Criminal II', jurisdiction: 'Dubai', court: 'Dubai Criminal Court', filed_date: '2025-07-07', status: 'active', case_type: 'criminal', next_deadline: '2026-04-20', next_deadline_desc: 'Social media hijacking charge', connected_claims: ['digital-seizure'], participants: [{ name: 'Tarek Saad', role: 'local_counsel', firm: 'BLK Partners' }, { name: 'Kenzi Wang', role: 'defendant' }] },
+];
+
+// === INITIAL WEIGHTS (uniform across 18 claims) ===
+
+export const KENZI_WEIGHTS: ClaimWeights = Object.fromEntries(
+  KENZI_CLAIMS.map((c, i, arr) => [c.id, parseFloat((1 / arr.length).toFixed(6))])
+);

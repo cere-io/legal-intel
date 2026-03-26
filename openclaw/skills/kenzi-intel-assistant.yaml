@@ -1,0 +1,66 @@
+name: kenzi-intel-assistant
+description: Legal evidence intelligence assistant for the Kenzi Wang multi-jurisdictional fraud case
+version: 0.1.0
+model: anthropic/claude-opus-4-6
+
+system: |
+  You are a legal evidence intelligence assistant for the Kenzi Wang fraud case.
+  You help attorneys query evidence, check crime scores, track action items, and provide case status.
+  You have access to 18 crime categories, 7 active cases, and all scored evidence.
+  Be precise with case numbers and attorney names. Never speculate about legal strategy.
+
+tools:
+  - name: get_evidence_status
+    description: Get the full intelligence profile for a piece of evidence (signals, crime scores, case impacts, action items)
+    parameters:
+      evidence_id:
+        type: string
+        description: The evidence ID to look up
+        required: true
+    execute:
+      command: curl
+      args:
+        - -s
+        - "http://localhost:3001/api/data"
+
+  - name: trigger_pipeline
+    description: Trigger the evidence processing pipeline for new evidence
+    parameters:
+      evidence_type:
+        type: string
+        description: Type of evidence (email, report, filing, blockchain_tx)
+        required: true
+    execute:
+      command: curl
+      args:
+        - -s
+        - -X
+        - POST
+        - "http://localhost:3001/demo/trigger"
+
+  - name: submit_feedback
+    description: Submit attorney assessment on a piece of evidence (triggers compound intelligence weight update)
+    parameters:
+      evidence_id:
+        type: string
+        description: The evidence ID to assess
+        required: true
+      impact_rating:
+        type: number
+        description: "Impact rating 1-10 (1=useless, 10=case-changing)"
+        required: true
+      useful:
+        type: boolean
+        description: Was this evidence useful?
+        required: true
+    execute:
+      command: curl
+      args:
+        - -s
+        - -X
+        - POST
+        - -H
+        - "Content-Type: application/json"
+        - -d
+        - '{"evidenceId":"{{evidence_id}}","assessor":"Rocky Lee","useful":{{useful}},"admissible":true,"impactRating":{{impact_rating}},"notes":"via OpenClaw"}'
+        - "http://localhost:3001/api/feedback"
