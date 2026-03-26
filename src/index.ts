@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { query } from './db/connection.js';
-import { initRuntime, dumpCubbies, getCubbyTree, getCubby, resetCubbies, getCubbyHistory, createContext } from './runtime.js';
+import { initRuntime, dumpCubbies, getCubbyTree, getCubby, resetCubbies, getCubbyHistory, createContext, clearCleanCache } from './runtime.js';
 import { handle as conciergeHandle } from './agents/concierge.js';
 import { distill } from './agents/distillation.js';
 import { ROCKY_EMAIL } from './data/rocky-email.js';
@@ -443,6 +443,7 @@ app.post('/demo/trigger', async (_req, res) => {
 app.post('/demo/clean/reset', async (_req, res) => {
   // Delete all clean/ prefixed cubbies
   await query(`DELETE FROM cubbies WHERE path LIKE 'clean/%'`);
+  clearCleanCache();
   await initRuntime();
   broadcast({ type: 'clean_reset', data: {} });
   res.json({ ok: true });

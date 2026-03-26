@@ -9,6 +9,11 @@
 import type { Context, CubbyClient, VectorMatch, FetchResponse } from './types/index.js';
 import { query } from './db/connection.js';
 
+// Shared cache for clean namespace — ensures dumpCubbies() sees clean data
+const _cleanCache = new Map<string, unknown>();
+export function setCleanCache(path: string, value: unknown) { _cleanCache.set(path, value); }
+export function clearCleanCache() { _cleanCache.clear(); }
+
 class PgCubby {
     private prefix: string;
     private cache: Map<string, unknown> = new Map();
@@ -102,6 +107,10 @@ class PgCubby {
 
     private async persist(path: string, data: unknown): Promise<void> {
         const json = JSON.stringify(data);
+        // Mirror clean/ writes to shared cache for dumpCubbies()
+        if (path.startsWith('clean/')) {
+            _cleanCache.set(path, data);
+        }
         await query(
             `INSERT INTO cubbies (path, data, version, updated_at) VALUES ($1, $2::jsonb, 1, NOW())
              ON CONFLICT (path) DO UPDATE SET data = $2::jsonb, version = cubbies.version + 1, updated_at = NOW()`,
@@ -161,12 +170,19 @@ const globalCubby = new PgCubby();
 /** Load all cubbies from Postgres into cache */
 export async function initRuntime(): Promise<void> {
     await globalCubby.loadAll();
-    console.log(`[RUNTIME] Loaded ${globalCubby.getTree().length} cubby entries into cache`);
+    // Load clean namespace entries into shared cache
+    _cleanCache.clear();
+    const cleanRes = await query(`SELECT path, data FROM cubbies WHERE path LIKE 'clean/%'`);
+    for (const row of cleanRes.rows) {
+        _cleanCache.set(row.path, row.data);
+    }
+    console.log(`[RUNTIME] Loaded ${globalCubby.getTree().length} cubby entries + ${_cleanCache.size} clean entries`);
 }
 
 /** Create a Context for agent execution */
 export function createContext(namespace = ''): { context: Context; logs: string[] } {
     const logs: string[] = [];
+    // Use global cubby with namespace prefix so dumpCubbies() sees everything
     const cubbyInstance = namespace ? new PgCubby(namespace) : globalCubby;
 
     // Load namespace cubbies if different from global
@@ -203,15 +219,25 @@ export function createContext(namespace = ''): { context: Context; logs: string[
 
 /** Get cubby dump for inspector */
 export function dumpCubbies(namespace = ''): Record<string, unknown> {
+    const dump = globalCubby.dump();
+    // Also merge any clean/ entries from Postgres that aren't in global cache
+    // (clean namespace uses separate PgCubby instance)
+    if (_cleanCache) {
+        for (const [k, v] of _cleanCache.entries()) {
+            dump[k] = v;
+        }
+    }
     if (namespace) {
         const filtered: Record<string, unknown> = {};
-        for (const [k, v] of Object.entries(globalCubby.dump())) {
+        for (const [k, v] of Object.entries(dump)) {
             if (k.startsWith(namespace)) filtered[k] = v;
         }
         return filtered;
     }
-    return globalCubby.dump();
+    return dump;
 }
+
+// (moved _cleanCache declaration to top of file)
 
 /** Get cubby tree for inspector */
 export function getCubbyTree(namespace = ''): Array<{ path: string; preview: string }> {
