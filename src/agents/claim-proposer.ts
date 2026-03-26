@@ -146,7 +146,7 @@ CRITICAL RULES:
         method: 'POST',
         headers: geminiHeaders(),
         body: JSON.stringify({
-            model: 'gemini-2.5-flash',
+            model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
             messages: [{ role: 'user', content: systemPrompt }],
             temperature: 0.2,
         }),

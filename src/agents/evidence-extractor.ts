@@ -74,7 +74,7 @@ Include ALL claims with relevance >= 0.25. Be generous — it's better to flag a
         method: 'POST',
         headers: geminiHeaders(),
         body: JSON.stringify({
-            model: 'gemini-2.5-flash',
+            model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
             messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: `Type: ${evidenceType}\nSource: ${source}\n\n${content.slice(0, 6000)}` }

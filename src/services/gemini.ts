@@ -45,7 +45,7 @@ Return ALL 18 crimes. Be precise and specific in reasoning.`;
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({
-      model: 'gemini-2.5-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
     }),
@@ -90,7 +90,7 @@ Only include cases with direct or supporting impact.`;
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({
-      model: 'gemini-2.5-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
     }),
