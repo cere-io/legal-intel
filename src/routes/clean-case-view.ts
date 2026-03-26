@@ -170,6 +170,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     ${Array.from(allEntities).map(e => `<span class="entity-tag">${e}</span>`).join('')}
   </div>
 
+  <!-- Case Graph -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3)">Case Network Graph</div>
+      <div style="display:flex;gap:8px;font-size:8px;color:var(--text3)">
+        <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:50%;background:#5a8a5e"></span>Strong claim</span>
+        <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:50%;background:#c47a4a"></span>Developing</span>
+        <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:4px;background:#5a8a8a"></span>Evidence</span>
+      </div>
+    </div>
+    <div id="clean-graph" style="min-height:300px"></div>
+  </div>
+
   <!-- Claims -->
   <div class="section-label">Claims (${claims.length})</div>
   ${claims.map(c => {
@@ -255,6 +268,73 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     Powered by <span style="color:var(--primary);font-weight:600">Claim Intelligence Engine</span> &mdash; Cere Network
   </div>
 </div>
+</div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+fetch('/api/graph/clean').then(function(r){return r.json()}).then(function(data){
+  if(!data.nodes||data.nodes.length===0)return;
+  var container=document.getElementById('clean-graph');
+  var width=container.clientWidth||800;
+  var height=300;
+  var svg=d3.select('#clean-graph').append('svg').attr('width',width).attr('height',height)
+    .style('background','#f5f0eb').style('border-radius','8px').style('border','1px solid #d8d0c6');
+
+  var simulation=d3.forceSimulation(data.nodes)
+    .force('link',d3.forceLink(data.links).id(function(d){return d.id}).distance(80).strength(0.4))
+    .force('charge',d3.forceManyBody().strength(-150))
+    .force('center',d3.forceCenter(width/2,height/2))
+    .force('collision',d3.forceCollide().radius(function(d){return d.radius+6}));
+
+  var link=svg.append('g').selectAll('line').data(data.links).enter().append('line')
+    .attr('stroke','#d8d0c6').attr('stroke-width',function(d){return 1+d.strength*2}).attr('stroke-opacity',0.5);
+
+  var node=svg.append('g').selectAll('g').data(data.nodes).enter().append('g')
+    .attr('cursor','pointer')
+    .call(d3.drag().on('start',function(e,d){if(!e.active)simulation.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y})
+      .on('drag',function(e,d){d.fx=e.x;d.fy=e.y})
+      .on('end',function(e,d){if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null}));
+
+  node.each(function(d){
+    var el=d3.select(this);
+    if(d.type==='evidence'){
+      el.append('rect').attr('width',d.radius*2).attr('height',d.radius*2).attr('x',-d.radius).attr('y',-d.radius)
+        .attr('rx',3).attr('fill',d.color).attr('stroke','#fff').attr('stroke-width',1.5);
+    } else {
+      el.append('circle').attr('r',d.radius).attr('fill',d.color).attr('stroke','#fff').attr('stroke-width',1.5);
+    }
+  });
+
+  node.append('text').text(function(d){return d.label.length>20?d.label.slice(0,20)+'...':d.label})
+    .attr('dy',function(d){return d.radius+12}).attr('text-anchor','middle')
+    .attr('font-size','9px').attr('fill','#6b6259').attr('font-family','Inter,sans-serif');
+
+  // Tooltip
+  var tooltip=d3.select('body').append('div')
+    .style('position','absolute').style('background','#fff').style('border','1px solid #d8d0c6')
+    .style('border-radius','8px').style('padding','8px 12px').style('font-size','10px')
+    .style('pointer-events','none').style('opacity',0).style('z-index','100')
+    .style('box-shadow','0 4px 12px rgba(0,0,0,.1)').style('font-family','Inter,sans-serif');
+
+  node.on('mouseover',function(e,d){
+    tooltip.style('opacity',1)
+      .html('<strong>'+d.label+'</strong><br><span style="color:#9a9087">'+d.type+(d.strength?(' | '+Math.round(d.strength*100)+'%'):'')+'</span>')
+      .style('left',(e.pageX+10)+'px').style('top',(e.pageY-10)+'px');
+  }).on('mouseout',function(){tooltip.style('opacity',0)});
+
+  node.on('click',function(e,d){
+    if(d.type==='claim'){
+      var el=document.getElementById('claim-'+d.id);
+      if(el){document.getElementById('body-'+d.id).classList.add('open');document.getElementById('toggle-'+d.id).classList.add('open');el.scrollIntoView({behavior:'smooth'})}
+    }
+  });
+
+  simulation.on('tick',function(){
+    link.attr('x1',function(d){return d.source.x}).attr('y1',function(d){return d.source.y})
+      .attr('x2',function(d){return d.target.x}).attr('y2',function(d){return d.target.y});
+    node.attr('transform',function(d){return 'translate('+d.x+','+d.y+')'});
+  });
+});
+</script>
 </body>
 </html>`);
 }

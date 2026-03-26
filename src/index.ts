@@ -52,6 +52,47 @@ function broadcast(event: SSEEvent) {
 app.get('/api/graph/main', mainGraph);
 app.get('/api/graph/claim/:id', claimGraph);
 
+// Clean case graph API
+app.get('/api/graph/clean', (_req, res) => {
+  const allData = dumpCubbies();
+  const nodes: Array<{ id: string; label: string; type: string; strength?: number; radius: number; color: string }> = [];
+  const links: Array<{ source: string; target: string; strength: number }> = [];
+  const claims: Array<{ id: string; title: string; strength: number; connected_claims?: Record<string, number>; evidence_chain?: string[] }> = [];
+
+  Object.entries(allData).forEach(([k, v]) => {
+    if (k.startsWith('clean/claims/')) {
+      const c = v as typeof claims[0] & { title: string };
+      claims.push(c);
+      nodes.push({ id: c.id, label: c.title, type: 'claim', strength: c.strength, radius: 10 + (c.strength || 0) * 16, color: (c.strength || 0) >= 0.7 ? '#5a8a5e' : (c.strength || 0) >= 0.4 ? '#c47a4a' : '#9a9087' });
+    }
+  });
+
+  // Evidence nodes
+  Object.entries(allData).forEach(([k, v]) => {
+    if (k.startsWith('clean/evidence/')) {
+      const ev = v as { id: string; title: string; type: string };
+      nodes.push({ id: 'ev-' + ev.id, label: ev.title, type: 'evidence', radius: 7, color: '#5a8a8a' });
+    }
+  });
+
+  // Links: claim → evidence
+  claims.forEach(c => {
+    (c.evidence_chain || []).forEach(eid => {
+      if (nodes.find(n => n.id === 'ev-' + eid)) {
+        links.push({ source: c.id, target: 'ev-' + eid, strength: 0.6 });
+      }
+    });
+    // Claim → claim connections
+    Object.entries(c.connected_claims || {}).forEach(([connId, str]) => {
+      if (c.id < connId && claims.find(cl => cl.id === connId)) {
+        links.push({ source: c.id, target: connId, strength: str as number });
+      }
+    });
+  });
+
+  res.json({ nodes, links });
+});
+
 // === CUBBY API ===
 
 app.get('/api/cubbies', (_req, res) => {
