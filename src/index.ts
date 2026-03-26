@@ -569,35 +569,66 @@ app.post('/demo/clean/confirm/:claimId', (req, res) => {
 
 app.post('/demo/clean/feedback', async (req, res) => {
   const { context, logs } = createContext('clean');
-  const body = req.body as { claim_id?: string; ai_score?: number; attorney_score?: number; element_reviews?: Record<string, string> } | undefined;
+  const body = req.body as { claim_id?: string; ai_score?: number; attorney_score?: number } | undefined;
 
-  // Use actual attorney review data if provided, otherwise fall back to hardcoded
   const claimId = body?.claim_id || 'embezzlement';
   const aiScore = body?.ai_score || 85;
   const attorneyScore = body?.attorney_score || 85;
   const delta = attorneyScore - aiScore;
 
-  // Run distillation with the review data
-  const result = await distill({
-    evidenceId: 'attorney-review-' + claimId,
-    assessor: 'Attorney (manual review)',
-    impactRating: Math.round(attorneyScore / 10),
-    useful: true,
-    admissible: true,
-    notes: `Claim "${claimId}": AI scored ${aiScore}%, attorney scored ${attorneyScore}% (delta: ${delta > 0 ? '+' : ''}${delta}%). ${Math.abs(delta) <= 5 ? 'Strong agreement.' : Math.abs(delta) <= 15 ? 'Moderate disagreement — weights adjusted.' : 'Significant disagreement — recalibration applied.'}`,
-  }, context);
-
-  // Read updated weights
+  // Direct weight update (bypasses distillation agent's evidence lookup)
   const metaCubby = context.cubby('meta');
-  const weights = metaCubby.json.get('/claim_weights/default') as Record<string, number> | null;
+  const claimsCubby = context.cubby('claims');
+  let currentWeights = (metaCubby.json.get('/claim_weights/default') || {}) as Record<string, number>;
+
+  // Initialize weights from all claims if empty
+  if (Object.keys(currentWeights).length === 0) {
+    // Read claims from dumpCubbies (merges both caches)
+    const allData = dumpCubbies();
+    const cleanClaims = Object.entries(allData)
+      .filter(([k]) => k.startsWith('clean/claims/'))
+      .map(([, v]) => v as { id: string });
+    if (cleanClaims.length > 0) {
+      cleanClaims.forEach(c => { currentWeights[c.id] = 1.0 / cleanClaims.length; });
+    }
+  }
+
+  // Adjust weight for reviewed claim based on delta
+  const MAX_DELTA = 0.05;
+  const absDelta = Math.abs(delta);
+  if (claimId in currentWeights) {
+    if (delta > 0) {
+      // Attorney scored HIGHER than AI — boost this claim
+      currentWeights[claimId] += Math.min(MAX_DELTA, absDelta * 0.001);
+    } else if (delta < 0) {
+      // Attorney scored LOWER than AI — penalize this claim
+      currentWeights[claimId] = Math.max(0.01, currentWeights[claimId] - Math.min(MAX_DELTA, absDelta * 0.001));
+    }
+  }
+
+  // Normalize to sum = 1.0
+  const sum = Object.values(currentWeights).reduce((a, b) => a + b, 0);
+  for (const k of Object.keys(currentWeights)) {
+    currentWeights[k] = parseFloat((currentWeights[k]! / sum).toFixed(4));
+  }
+
+  // Persist
+  metaCubby.json.set('/claim_weights/default', currentWeights);
+
+  // Record outcome
+  const outcomesCubby = context.cubby('outcomes');
+  outcomesCubby.json.set('/review-' + claimId + '-' + Date.now(), {
+    claim_id: claimId, ai_score: aiScore, attorney_score: attorneyScore, delta,
+    assessor: 'Attorney', timestamp: new Date().toISOString(),
+  });
 
   const response = {
-    ...result,
+    success: true,
     claim_id: claimId,
     ai_score: aiScore,
     attorney_score: attorneyScore,
     delta,
-    updated_weights: weights,
+    updated_weights: currentWeights,
     logs,
   };
   broadcast({ type: 'weights_updated', data: { ...response, tab: 'clean' } });
