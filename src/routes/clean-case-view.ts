@@ -476,15 +476,28 @@ function updateElDelta(claimId, elId, aiStatus) {
 function submitReview(claimId, aiScore) {
   var slider = document.getElementById('atty-strength-' + claimId);
   var attyScore = slider ? parseInt(slider.value) : aiScore;
-  var btn = event.target;
-  btn.textContent = 'Submitting...';
+  var btn = event.target.closest('button');
+  btn.textContent = 'Submitting to Distillation Agent...';
   btn.disabled = true;
   fetch('/demo/clean/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ claim_id: claimId, ai_score: aiScore, attorney_score: attyScore }) })
-    .then(function() {
-      btn.textContent = 'Submitted \u2192 Distillation';
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var delta = data.delta || 0;
+      var absD = Math.abs(delta);
+      btn.textContent = 'Weights Updated';
       btn.style.color = 'var(--green)';
       btn.style.borderColor = 'var(--green)';
       btn.style.background = 'rgba(90,138,90,.05)';
+      // Show distillation result below the button
+      var resultDiv = document.createElement('div');
+      resultDiv.style.cssText = 'margin-top:10px;padding:12px;background:rgba(90,138,90,.04);border:1px solid rgba(90,138,90,.15);border-radius:8px;font-size:10px;line-height:1.6';
+      var agreementLabel = absD <= 5 ? 'Strong agreement' : absD <= 15 ? 'Moderate disagreement' : 'Significant disagreement';
+      var agreementColor = absD <= 5 ? 'var(--green)' : absD <= 15 ? 'var(--primary)' : 'var(--red)';
+      resultDiv.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px">&#x2699; Distillation Complete</div>' +
+        '<div><strong>AI:</strong> ' + aiScore + '% &rarr; <strong>Attorney:</strong> ' + attyScore + '% &rarr; <strong style="color:' + agreementColor + '">Delta: ' + (delta > 0 ? '+' : '') + delta + '% (' + agreementLabel + ')</strong></div>' +
+        '<div style="margin-top:4px;color:var(--text3)">' + (absD <= 5 ? 'Claim weights confirmed. No recalibration needed.' : 'Claim weights adjusted. The AI will score ' + (delta > 0 ? 'higher' : 'lower') + ' on similar evidence next time.') + '</div>' +
+        (data.updated_weights ? '<div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--text3)">Updated weights: ' + JSON.stringify(data.updated_weights).slice(0, 150) + '...</div>' : '');
+      btn.parentNode.appendChild(resultDiv);
     }).catch(function() {
       btn.textContent = 'Error';
       btn.style.color = 'var(--red)';

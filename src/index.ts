@@ -569,10 +569,39 @@ app.post('/demo/clean/confirm/:claimId', (req, res) => {
 
 app.post('/demo/clean/feedback', async (req, res) => {
   const { context, logs } = createContext('clean');
-  const fb = CLEAN_FEEDBACK;
-  const result = await distill({ evidenceId: fb.evidence_id, assessor: fb.assessor, impactRating: fb.impact_rating, useful: fb.useful, admissible: fb.admissible, notes: fb.notes }, context);
-  broadcast({ type: 'weights_updated', data: { ...result, tab: 'clean' } });
-  res.json({ ...result, logs });
+  const body = req.body as { claim_id?: string; ai_score?: number; attorney_score?: number; element_reviews?: Record<string, string> } | undefined;
+
+  // Use actual attorney review data if provided, otherwise fall back to hardcoded
+  const claimId = body?.claim_id || 'embezzlement';
+  const aiScore = body?.ai_score || 85;
+  const attorneyScore = body?.attorney_score || 85;
+  const delta = attorneyScore - aiScore;
+
+  // Run distillation with the review data
+  const result = await distill({
+    evidenceId: 'attorney-review-' + claimId,
+    assessor: 'Attorney (manual review)',
+    impactRating: Math.round(attorneyScore / 10),
+    useful: true,
+    admissible: true,
+    notes: `Claim "${claimId}": AI scored ${aiScore}%, attorney scored ${attorneyScore}% (delta: ${delta > 0 ? '+' : ''}${delta}%). ${Math.abs(delta) <= 5 ? 'Strong agreement.' : Math.abs(delta) <= 15 ? 'Moderate disagreement — weights adjusted.' : 'Significant disagreement — recalibration applied.'}`,
+  }, context);
+
+  // Read updated weights
+  const metaCubby = context.cubby('meta');
+  const weights = metaCubby.json.get('/claim_weights/default') as Record<string, number> | null;
+
+  const response = {
+    ...result,
+    claim_id: claimId,
+    ai_score: aiScore,
+    attorney_score: attorneyScore,
+    delta,
+    updated_weights: weights,
+    logs,
+  };
+  broadcast({ type: 'weights_updated', data: { ...response, tab: 'clean' } });
+  res.json(response);
 });
 
 // Custom evidence intake for clean case dashboard
