@@ -203,6 +203,39 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     </div>
   </div>
 
+  <!-- Claim Weights (Compound Intelligence) -->
+  ${(() => {
+    const weights = allData['clean/meta/claim_weights/default'] as Record<string, number> | undefined;
+    if (!weights || Object.keys(weights).length === 0) return `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px">&#x2699; Claim Weights &mdash; Compound Intelligence</div>
+      <div style="font-size:11px;color:var(--text3)">No weights yet. Confirm claims and submit attorney reviews to initialize the weight system. Weights determine how the AI prioritizes claims when scoring future evidence.</div>
+    </div>`;
+    const sorted = Object.entries(weights).sort(([,a],[,b]) => b - a);
+    const maxWeight = Math.max(...sorted.map(([,w]) => w));
+    return `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3)">&#x2699; Claim Weights &mdash; Compound Intelligence</div>
+        <div style="font-size:8px;color:var(--text3)">Updated by Distillation Agent after attorney reviews</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${sorted.map(([claimId, weight]) => {
+          const pct = Math.round(weight * 100);
+          const barWidth = maxWeight > 0 ? Math.round((weight / maxWeight) * 100) : 0;
+          const claimObj = claims.find(c => c.id === claimId);
+          const label = claimObj ? claimObj.title : claimId;
+          return `<div style="display:grid;grid-template-columns:200px 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${label}">${label}</span>
+            <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;width:${barWidth}%;background:var(--primary);border-radius:4px;transition:width .5s"></div></div>
+            <span style="font-weight:700;color:var(--text);text-align:right;font-family:var(--mono)">${pct}%</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:8px;font-size:8px;color:var(--text3)">Higher weight = AI prioritizes this claim when scoring new evidence. Weights shift when attorneys disagree with AI scores.</div>
+    </div>`;
+  })()}
+
   <!-- Entities -->
   <div class="entity-bar">
     <span style="font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1px;line-height:22px">ENTITIES:</span>
@@ -496,7 +529,7 @@ function submitReview(claimId, aiScore) {
       resultDiv.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px">&#x2699; Distillation Complete</div>' +
         '<div><strong>AI:</strong> ' + aiScore + '% &rarr; <strong>Attorney:</strong> ' + attyScore + '% &rarr; <strong style="color:' + agreementColor + '">Delta: ' + (delta > 0 ? '+' : '') + delta + '% (' + agreementLabel + ')</strong></div>' +
         '<div style="margin-top:4px;color:var(--text3)">' + (absD <= 5 ? 'Claim weights confirmed. No recalibration needed.' : 'Claim weights adjusted. The AI will score ' + (delta > 0 ? 'higher' : 'lower') + ' on similar evidence next time.') + '</div>' +
-        (data.updated_weights ? '<div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--text3)">Updated weights: ' + JSON.stringify(data.updated_weights).slice(0, 150) + '...</div>' : '');
+        '<div style="margin-top:8px"><a href="/clean/case" style="font-size:10px;color:var(--primary);font-weight:600">Refresh dashboard to see updated weights &rarr;</a></div>';
       btn.parentNode.appendChild(resultDiv);
     }).catch(function() {
       btn.textContent = 'Error';
