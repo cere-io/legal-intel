@@ -238,7 +238,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 
     return `
     <div class="claim-section" id="claim-${c.id}">
-      <div class="claim-header" onclick="var b=document.getElementById('body-${c.id}');var t=document.getElementById('toggle-${c.id}');b.classList.toggle('open');t.classList.toggle('open');if(b.classList.contains('open'))renderClaimGraph('${c.id}')">
+      <div class="claim-header" onclick="var b=document.getElementById('body-${c.id}');var t=document.getElementById('toggle-${c.id}');b.classList.toggle('open');t.classList.toggle('open');if(b.classList.contains('open'))setTimeout(function(){renderClaimGraph('${c.id}')},150)">
         <div class="claim-left">
           <span class="toggle" id="toggle-${c.id}">&#x25B6;</span>
           <span class="claim-title">${c.title}</span>
@@ -265,6 +265,54 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
             </div>
           </div>
           <div id="graph-${c.id}" style="min-height:200px;background:var(--bg);border-radius:8px;border:1px solid var(--border)"></div>
+        </div>
+
+        <!-- Dual-Stream Comparison: AI vs Attorney -->
+        <div style="margin:16px 0;padding:16px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:12px">Dual-Stream Assessment &mdash; AI vs Attorney</div>
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;font-size:11px">
+            <!-- AI Stream header -->
+            <div style="padding:8px 12px;background:rgba(196,122,74,.06);border-radius:8px 0 0 0;font-weight:700;color:var(--primary);text-align:center;border-bottom:1px solid var(--border)">&#x1F916; AI Assessment</div>
+            <div style="padding:8px 4px;text-align:center;font-size:8px;color:var(--text3);border-bottom:1px solid var(--border)">Delta</div>
+            <div style="padding:8px 12px;background:rgba(90,138,90,.06);border-radius:0 8px 0 0;font-weight:700;color:var(--green);text-align:center;border-bottom:1px solid var(--border)">&#x2696; Attorney Review</div>
+
+            <!-- Overall strength -->
+            <div style="padding:10px 12px;text-align:center">
+              <div style="font-size:20px;font-weight:800;color:${strColor}">${str}%</div>
+              <div style="font-size:8px;color:var(--text3)">AI Strength Score</div>
+            </div>
+            <div style="padding:10px 4px;text-align:center;display:flex;align-items:center;justify-content:center">
+              <span id="delta-${c.id}" style="font-size:10px;font-weight:700;color:var(--text3)">?</span>
+            </div>
+            <div style="padding:10px 12px;text-align:center">
+              <input type="range" min="0" max="100" value="${str}" id="atty-strength-${c.id}" oninput="updateDelta('${c.id}')" style="width:100%">
+              <div style="font-size:12px;font-weight:700;color:var(--green)" id="atty-val-${c.id}">${str}%</div>
+              <div style="font-size:8px;color:var(--text3)">Your Assessment</div>
+            </div>
+
+            ${(c.elements || []).map(el => {
+              const aiStatus = el.status;
+              const aiIcon = aiStatus === 'proven' ? '&#x2705;' : aiStatus === 'partial' ? '&#x1F7E1;' : '&#x274C;';
+              return `
+            <!-- Element: ${el.name} -->
+            <div style="padding:6px 12px;border-top:1px solid rgba(0,0,0,.04);font-size:10px">
+              ${aiIcon} ${el.name}: <strong>${aiStatus}</strong>
+            </div>
+            <div style="padding:6px 4px;border-top:1px solid rgba(0,0,0,.04);text-align:center;font-size:9px;color:var(--text3)" id="el-delta-${c.id}-${el.id}"></div>
+            <div style="padding:6px 12px;border-top:1px solid rgba(0,0,0,.04)">
+              <select id="atty-el-${c.id}-${el.id}" onchange="updateElDelta('${c.id}','${el.id}','${aiStatus}')" style="font-size:9px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-family:var(--font)">
+                <option value="" selected>-- Select --</option>
+                <option value="proven" ${aiStatus === 'proven' ? 'selected' : ''}>Proven</option>
+                <option value="partial" ${aiStatus === 'partial' ? 'selected' : ''}>Partial</option>
+                <option value="unproven">Unproven</option>
+              </select>
+            </div>`;
+            }).join('')}
+          </div>
+          <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:9px;color:var(--text3)" id="agreement-${c.id}">Move the slider and rate elements to see agreement</div>
+            <button onclick="submitReview('${c.id}',${str})" style="padding:6px 14px;border:1px solid var(--green);border-radius:6px;background:transparent;color:var(--green);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font)">Submit Review &rarr; Distillation</button>
+          </div>
         </div>
 
         ${total > 0 ? `
@@ -390,6 +438,57 @@ function setPipe(name) {
 function setPipeDone(name) {
   var el = document.getElementById('cp-' + name);
   if (el) el.style.cssText = 'padding:4px 10px;border-radius:10px;background:rgba(90,138,90,.1);color:var(--green)';
+}
+
+// Dual-stream comparison functions
+function updateDelta(claimId) {
+  var slider = document.getElementById('atty-strength-' + claimId);
+  var valEl = document.getElementById('atty-val-' + claimId);
+  var deltaEl = document.getElementById('delta-' + claimId);
+  var agreeEl = document.getElementById('agreement-' + claimId);
+  if (!slider || !valEl || !deltaEl) return;
+  var attyVal = parseInt(slider.value);
+  valEl.textContent = attyVal + '%';
+  // Get AI value from the claim header
+  var aiStr = parseInt(document.querySelector('#claim-' + claimId + ' .strength')?.textContent || '0');
+  var delta = attyVal - aiStr;
+  var absD = Math.abs(delta);
+  deltaEl.textContent = (delta > 0 ? '+' : '') + delta;
+  deltaEl.style.color = absD <= 5 ? 'var(--green)' : absD <= 15 ? 'var(--primary)' : 'var(--red)';
+  // Agreement level
+  if (agreeEl) {
+    if (absD <= 5) agreeEl.innerHTML = '<span style="color:var(--green);font-weight:600">&#x2705; Strong agreement (delta &le;5%)</span> &mdash; AI calibration is accurate';
+    else if (absD <= 15) agreeEl.innerHTML = '<span style="color:var(--primary);font-weight:600">&#x1F7E1; Moderate agreement (delta ' + absD + '%)</span> &mdash; weights will be adjusted';
+    else agreeEl.innerHTML = '<span style="color:var(--red);font-weight:600">&#x274C; Significant disagreement (delta ' + absD + '%)</span> &mdash; requires recalibration';
+  }
+}
+
+function updateElDelta(claimId, elId, aiStatus) {
+  var select = document.getElementById('atty-el-' + claimId + '-' + elId);
+  var deltaEl = document.getElementById('el-delta-' + claimId + '-' + elId);
+  if (!select || !deltaEl) return;
+  var attyVal = select.value;
+  if (!attyVal) { deltaEl.textContent = ''; return; }
+  if (attyVal === aiStatus) { deltaEl.innerHTML = '<span style="color:var(--green)">&#x2705;</span>'; }
+  else { deltaEl.innerHTML = '<span style="color:var(--red)">&#x26A0;</span>'; }
+}
+
+function submitReview(claimId, aiScore) {
+  var slider = document.getElementById('atty-strength-' + claimId);
+  var attyScore = slider ? parseInt(slider.value) : aiScore;
+  var btn = event.target;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  fetch('/demo/clean/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ claim_id: claimId, ai_score: aiScore, attorney_score: attyScore }) })
+    .then(function() {
+      btn.textContent = 'Submitted \u2192 Distillation';
+      btn.style.color = 'var(--green)';
+      btn.style.borderColor = 'var(--green)';
+      btn.style.background = 'rgba(90,138,90,.05)';
+    }).catch(function() {
+      btn.textContent = 'Error';
+      btn.style.color = 'var(--red)';
+    });
 }
 
 function simulateEmail() {
