@@ -237,7 +237,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   <div class="nav-links">
     <a href="/">Landing Page</a>
     <a href="/document">Kenzi Files (Full Case)</a>
-    <a href="/clean">Reset &amp; Start Over</a>
+    <a href="#" onclick="resetClean();return false">Reset &amp; Start Over</a>
   </div>
 </div>
 
@@ -443,7 +443,10 @@ function runStep(n) {
 }
 
 function resetClean() {
-  fetch('/demo/clean/reset', { method: 'POST' });
+  fetch('/demo/clean/reset', { method: 'POST' }).then(function() {
+    // Force reload after 500ms regardless of SSE
+    setTimeout(function() { location.reload(); }, 500);
+  });
 }
 
 function showPipeline() {
@@ -599,11 +602,21 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
-// Restore state from existing data
-${cleanClaims.length > 0 ? `currentStep = ${Math.min(cleanEvidence.length, 3)};
-${[1,2,3].map(n => cleanEvidence.length >= n ? `document.getElementById('step-${n}').classList.add('done');` : '').join(NL)}
-${cleanEvidence.length < 3 ? `var nextBtn = document.getElementById('step-${cleanEvidence.length + 1}'); if (nextBtn) nextBtn.disabled = false;` : ''}
-` : ''}
+// Restore state from existing data — check which scenario evidence IDs exist in cubbies
+${(() => {
+  const stepEvIds = ['apex-bank-stmt-1', 'apex-invoice-1', 'ortiz-bank-stmt-1'];
+  const completedSteps = stepEvIds.filter(id => allData['clean/evidence/' + id]).length;
+  if (completedSteps === 0) return '';
+  const lines: string[] = [];
+  lines.push('currentStep = ' + completedSteps + ';');
+  for (let i = 1; i <= completedSteps; i++) {
+    lines.push('document.getElementById("step-' + i + '").classList.add("done");');
+  }
+  if (completedSteps < 3) {
+    lines.push('document.getElementById("step-' + (completedSteps + 1) + '").disabled = false;');
+  }
+  return lines.join(NL);
+})()}
 </script>
 </body>
 </html>`);
