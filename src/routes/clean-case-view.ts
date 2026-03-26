@@ -268,50 +268,50 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
         </div>
 
         <!-- Dual-Stream Comparison: AI vs Attorney -->
-        <div style="margin:16px 0;padding:16px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:12px">Dual-Stream Assessment &mdash; AI vs Attorney</div>
-          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;font-size:11px">
-            <!-- AI Stream header -->
-            <div style="padding:8px 12px;background:rgba(196,122,74,.06);border-radius:8px 0 0 0;font-weight:700;color:var(--primary);text-align:center;border-bottom:1px solid var(--border)">&#x1F916; AI Assessment</div>
-            <div style="padding:8px 4px;text-align:center;font-size:8px;color:var(--text3);border-bottom:1px solid var(--border)">Delta</div>
-            <div style="padding:8px 12px;background:rgba(90,138,90,.06);border-radius:0 8px 0 0;font-weight:700;color:var(--green);text-align:center;border-bottom:1px solid var(--border)">&#x2696; Attorney Review</div>
+        <div style="margin:16px 0;padding:16px 20px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:14px">Dual-Stream Assessment</div>
 
-            <!-- Overall strength -->
-            <div style="padding:10px 12px;text-align:center">
-              <div style="font-size:20px;font-weight:800;color:${strColor}">${str}%</div>
-              <div style="font-size:8px;color:var(--text3)">AI Strength Score</div>
+          <!-- Overall strength comparison -->
+          <div style="display:grid;grid-template-columns:1fr 60px 1fr;gap:12px;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+            <div style="text-align:center;padding:12px;background:rgba(196,122,74,.04);border-radius:8px">
+              <div style="font-size:8px;font-weight:600;color:var(--primary);margin-bottom:4px">AI ASSESSMENT</div>
+              <div style="font-size:28px;font-weight:800;color:${strColor}">${str}%</div>
             </div>
-            <div style="padding:10px 4px;text-align:center;display:flex;align-items:center;justify-content:center">
-              <span id="delta-${c.id}" style="font-size:10px;font-weight:700;color:var(--text3)">?</span>
+            <div style="text-align:center">
+              <div id="delta-${c.id}" style="font-size:14px;font-weight:800;color:var(--green)">0%</div>
+              <div style="font-size:7px;color:var(--text3)">DELTA</div>
             </div>
-            <div style="padding:10px 12px;text-align:center">
-              <input type="range" min="0" max="100" value="${str}" id="atty-strength-${c.id}" oninput="updateDelta('${c.id}')" style="width:100%">
-              <div style="font-size:12px;font-weight:700;color:var(--green)" id="atty-val-${c.id}">${str}%</div>
-              <div style="font-size:8px;color:var(--text3)">Your Assessment</div>
+            <div style="text-align:center;padding:12px;background:rgba(90,138,90,.04);border-radius:8px">
+              <div style="font-size:8px;font-weight:600;color:var(--green);margin-bottom:4px">YOUR ASSESSMENT</div>
+              <input type="range" min="0" max="100" value="${str}" id="atty-strength-${c.id}" oninput="updateDelta('${c.id}')" style="width:100%;accent-color:var(--green);margin-bottom:2px">
+              <div style="font-size:20px;font-weight:800;color:var(--green)" id="atty-val-${c.id}">${str}%</div>
             </div>
+          </div>
 
-            ${(c.elements || []).map(el => {
-              const aiStatus = el.status;
-              const aiIcon = aiStatus === 'proven' ? '&#x2705;' : aiStatus === 'partial' ? '&#x1F7E1;' : '&#x274C;';
-              return `
-            <!-- Element: ${el.name} -->
-            <div style="padding:6px 12px;border-top:1px solid rgba(0,0,0,.04);font-size:10px">
-              ${aiIcon} ${el.name}: <strong>${aiStatus}</strong>
-            </div>
-            <div style="padding:6px 4px;border-top:1px solid rgba(0,0,0,.04);text-align:center;font-size:9px;color:var(--text3)" id="el-delta-${c.id}-${el.id}"></div>
-            <div style="padding:6px 12px;border-top:1px solid rgba(0,0,0,.04)">
-              <select id="atty-el-${c.id}-${el.id}" onchange="updateElDelta('${c.id}','${el.id}','${aiStatus}')" style="font-size:9px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-family:var(--font)">
-                <option value="" selected>-- Select --</option>
-                <option value="proven" ${aiStatus === 'proven' ? 'selected' : ''}>Proven</option>
-                <option value="partial" ${aiStatus === 'partial' ? 'selected' : ''}>Partial</option>
+          <!-- Element-by-element comparison -->
+          <div style="font-size:8px;font-weight:600;color:var(--text3);margin-bottom:8px">ELEMENT-LEVEL COMPARISON</div>
+          ${(c.elements || []).map(el => {
+            const aiStatus = el.status;
+            const aiIcon = aiStatus === 'proven' ? '&#x2705;' : aiStatus === 'partial' ? '&#x1F7E1;' : '&#x274C;';
+            return `
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.03)">
+            <div style="font-size:10px">${aiIcon} ${el.name}: <strong>${aiStatus}</strong></div>
+            <div style="text-align:center" id="el-delta-${c.id}-${el.id}"><span style="color:var(--text3);font-size:8px">&mdash;</span></div>
+            <div>
+              <select id="atty-el-${c.id}-${el.id}" onchange="updateElDelta('${c.id}','${el.id}','${aiStatus}')" style="width:100%;font-size:10px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);background:var(--surface);color:var(--text)">
+                <option value="${aiStatus}" selected>${aiStatus.charAt(0).toUpperCase() + aiStatus.slice(1)} (AI default)</option>
+                <option value="proven">Proven</option>
+                <option value="partial">Partial</option>
                 <option value="unproven">Unproven</option>
               </select>
-            </div>`;
-            }).join('')}
-          </div>
-          <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:9px;color:var(--text3)" id="agreement-${c.id}">Move the slider and rate elements to see agreement</div>
-            <button onclick="submitReview('${c.id}',${str})" style="padding:6px 14px;border:1px solid var(--green);border-radius:6px;background:transparent;color:var(--green);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font)">Submit Review &rarr; Distillation</button>
+            </div>
+          </div>`;
+          }).join('')}
+
+          <!-- Agreement + submit -->
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:10px;color:var(--text2)" id="agreement-${c.id}">Adjust scores to compare your assessment with AI</div>
+            <button onclick="submitReview('${c.id}',${str})" style="padding:8px 18px;border:1px solid var(--green);border-radius:8px;background:transparent;color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s" onmouseover="this.style.background='var(--green)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='var(--green)'">Submit &rarr; Distillation</button>
           </div>
         </div>
 
