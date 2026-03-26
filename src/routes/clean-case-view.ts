@@ -132,6 +132,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 
 /* Footer */
 .footer{text-align:center;padding:24px 0;font-size:9px;color:var(--text3);border-top:1px solid var(--border);margin-top:32px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pipe-step{padding:4px 10px;border-radius:10px;background:var(--bg);color:var(--text3);font-size:10px}
 </style>
 </head>
 <body>
@@ -148,6 +150,43 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
   <div class="header">
     <h1>Case Dashboard</h1>
     <p>${claims.length} claims from ${evidence.length} evidence items &mdash; AI-proposed, attorney-confirmed</p>
+  </div>
+
+  <!-- Evidence Intake -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3)">Add New Evidence</div>
+      <div id="intake-status" style="font-size:10px;color:var(--text3)"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <button onclick="simulateEmail()" style="padding:10px 20px;border:1px solid var(--primary);border-radius:8px;background:rgba(196,122,74,.05);color:var(--primary);font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font)">&#x2709; Simulate New Email</button>
+      <button onclick="document.getElementById('custom-ev-area').style.display=document.getElementById('custom-ev-area').style.display==='none'?'block':'none'" style="padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font)">&#x1F4DD; Paste Custom Evidence</button>
+    </div>
+    <div id="custom-ev-area" style="display:none">
+      <textarea id="custom-ev-text" placeholder="Paste evidence content here (email, report, bank statement, etc.)" style="width:100%;height:100px;padding:12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:11px;resize:vertical;background:var(--bg);color:var(--text)"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="custom-ev-source" placeholder="Source (e.g., Jennifer Wu <jwu@parkwu.law>)" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:var(--font)">
+        <select id="custom-ev-type" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:var(--font)">
+          <option value="email">Email</option>
+          <option value="bank_statement">Bank Statement</option>
+          <option value="invoice">Invoice</option>
+          <option value="report">Report</option>
+          <option value="filing">Court Filing</option>
+        </select>
+        <button onclick="submitCustomEvidence()" style="padding:8px 16px;border:none;border-radius:6px;background:var(--text);color:var(--bg);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">Process</button>
+      </div>
+    </div>
+    <!-- Pipeline progress -->
+    <div id="case-pipeline" style="display:none;margin-top:12px">
+      <div style="display:flex;gap:4px;align-items:center;justify-content:center;font-size:10px">
+        <span class="pipe-step" id="cp-extract">Extractor</span>
+        <span style="color:var(--border);font-size:8px">&rarr;</span>
+        <span class="pipe-step" id="cp-propose">Proposer</span>
+        <span style="color:var(--border);font-size:8px">&rarr;</span>
+        <span class="pipe-step" id="cp-score">Scorer</span>
+      </div>
+      <div id="case-timer" style="text-align:center;font-size:10px;color:var(--text3);margin-top:4px"></div>
+    </div>
   </div>
 
   <!-- Score Card -->
@@ -286,6 +325,103 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
+// === Evidence intake + SSE for live updates ===
+var caseEvtSource = new EventSource('/api/events');
+var caseTimer = null;
+caseEvtSource.onmessage = function(e) {
+  try {
+    var d = JSON.parse(e.data);
+    if (d.type !== 'step' || !d.data || d.data.tab !== 'clean') return;
+    var s = d.data;
+    var status = document.getElementById('intake-status');
+    var pipeline = document.getElementById('case-pipeline');
+
+    if (s.step === 'received') {
+      if (status) status.innerHTML = '<span style="color:var(--primary)">&#x2709; Evidence received</span>';
+    }
+    if (s.step === 'extracting') {
+      if (pipeline) pipeline.style.display = 'block';
+      setPipe('extract');
+    }
+    if (s.step === 'extracted') { setPipeDone('extract'); }
+    if (s.step === 'proposing') { setPipe('propose'); }
+    if (s.step === 'proposed') {
+      setPipeDone('propose');
+      // Show enrichment notifications
+      if (s.enrichments && s.enrichments.length > 0) {
+        s.enrichments.forEach(function(en) {
+          var claimEl = document.querySelector('[id^="claim-' + en.claim_id + '"]');
+          if (claimEl) {
+            var body = claimEl.querySelector('.claim-body');
+            if (body) {
+              body.classList.add('open');
+              var note = document.createElement('div');
+              note.className = 'understanding';
+              note.style.borderLeftColor = 'var(--cyan)';
+              note.innerHTML = '<strong style="color:var(--cyan)">NEW ENRICHMENT:</strong> ' + en.changes;
+              body.insertBefore(note, body.firstChild);
+            }
+          }
+        });
+      }
+      if (s.proposals && s.proposals.length > 0) {
+        s.proposals.forEach(function(p) {
+          if (status) status.innerHTML = '<span style="color:var(--green)">New claim proposed: ' + p.title + '</span>';
+        });
+      }
+    }
+    if (s.step === 'scoring') { setPipe('score'); }
+    if (s.step === 'scored') { setPipeDone('score'); }
+    if (s.step === 'complete') {
+      if (pipeline) pipeline.style.display = 'none';
+      if (caseTimer) { clearInterval(caseTimer); caseTimer = null; }
+      document.getElementById('case-timer').textContent = '';
+      if (status) status.innerHTML = '<span style="color:var(--green)">&#x2705; Evidence processed &mdash; <a href="/clean/case" style="color:var(--primary)">refresh to see updates</a></span>';
+    }
+  } catch(err) {}
+};
+
+function setPipe(name) {
+  ['extract','propose','score'].forEach(function(s) {
+    var el = document.getElementById('cp-' + s);
+    if (el) el.style.cssText = s === name ? 'padding:4px 10px;border-radius:10px;background:rgba(196,122,74,.15);color:var(--primary);font-weight:700' : el.style.cssText;
+  });
+}
+function setPipeDone(name) {
+  var el = document.getElementById('cp-' + name);
+  if (el) el.style.cssText = 'padding:4px 10px;border-radius:10px;background:rgba(90,138,90,.1);color:var(--green)';
+}
+
+function simulateEmail() {
+  var status = document.getElementById('intake-status');
+  if (status) status.innerHTML = '<span class="spinner" style="width:10px;height:10px;display:inline-block;vertical-align:middle;margin-right:4px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite"></span> Processing simulated email...';
+  document.getElementById('case-pipeline').style.display = 'block';
+  startTimer();
+  fetch('/demo/clean/simulate-email', { method: 'POST' });
+}
+
+function submitCustomEvidence() {
+  var content = document.getElementById('custom-ev-text').value;
+  var source = document.getElementById('custom-ev-source').value;
+  var evType = document.getElementById('custom-ev-type').value;
+  if (!content.trim()) { alert('Please paste evidence content'); return; }
+  var status = document.getElementById('intake-status');
+  if (status) status.innerHTML = '<span class="spinner" style="width:10px;height:10px;display:inline-block;vertical-align:middle;margin-right:4px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite"></span> Processing...';
+  document.getElementById('case-pipeline').style.display = 'block';
+  document.getElementById('custom-ev-area').style.display = 'none';
+  startTimer();
+  fetch('/demo/clean/evidence', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: content, source: source, type: evType}) });
+}
+
+function startTimer() {
+  var start = Date.now();
+  var timerEl = document.getElementById('case-timer');
+  caseTimer = setInterval(function() {
+    var secs = Math.round((Date.now() - start) / 1000);
+    timerEl.textContent = 'Processing with Gemini AI... ' + secs + 's';
+  }, 1000);
+}
+
 var renderedClaimGraphs = {};
 function renderClaimGraph(claimId) {
   if (renderedClaimGraphs[claimId]) return;

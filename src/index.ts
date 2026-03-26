@@ -575,6 +575,101 @@ app.post('/demo/clean/feedback', async (req, res) => {
   res.json({ ...result, logs });
 });
 
+// Custom evidence intake for clean case dashboard
+app.post('/demo/clean/evidence', async (req, res) => {
+  const { content, source, type: evType } = req.body as { content: string; source: string; type: string };
+  if (!content) return res.status(400).json({ error: 'Missing content' });
+
+  const evidenceId = 'custom-' + Date.now();
+  res.json({ ok: true, evidenceId });
+
+  broadcast({ type: 'step', data: { step: 'received', message: 'Custom evidence: ' + (content.slice(0, 50)) + '...', evidence: { id: evidenceId, type: evType || 'email', title: content.split(String.fromCharCode(10))[0].slice(0, 80), source: source || 'Manual input', content }, tab: 'clean' } });
+
+  try {
+    const { context } = createContext('clean');
+    const { extract } = await import('./agents/evidence-extractor.js');
+    const { propose } = await import('./agents/claim-proposer.js');
+    const { score: scoreEvidence } = await import('./agents/claim-scorer.js');
+    const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+    broadcast({ type: 'step', data: { step: 'extracting', message: '[1/3] Extracting...', tab: 'clean' } });
+    const extractResult = await extract({ evidenceId, evidenceType: evType || 'email', source: source || 'Manual', content }, context) as { success: boolean; signal?: EvidenceItem };
+    if (!extractResult.success) throw new Error('Extraction failed');
+    broadcast({ type: 'step', data: { step: 'extracted', message: '[1/3] Done', tab: 'clean' } });
+
+    await delay(3000);
+
+    broadcast({ type: 'step', data: { step: 'proposing', message: '[2/3] Proposing claims...', tab: 'clean' } });
+    const proposeResult = await propose({ evidenceId, rawContent: content }, context) as { success: boolean; enrichments?: Array<{ claim_id: string; changes: string }>; proposals?: Array<Claim> };
+    if (!proposeResult.success) throw new Error('Proposal failed');
+    broadcast({ type: 'step', data: { step: 'proposed', message: '[2/3] Done', enrichments: proposeResult.enrichments, proposals: (proposeResult.proposals || []).map(p => ({ id: p.id, title: p.title, status: p.status })), tab: 'clean' } });
+
+    await delay(3000);
+
+    broadcast({ type: 'step', data: { step: 'scoring', message: '[3/3] Scoring...', tab: 'clean' } });
+    const scoreResult = await scoreEvidence({ evidenceId }, context) as { success: boolean; scoreRecord?: { scores: Array<{ claim_id: string; overall: number; reasoning: string }> } };
+    const scores = scoreResult.scoreRecord?.scores || [];
+    broadcast({ type: 'step', data: { step: 'scored', message: '[3/3] Done', scores: scores.map(s => ({ claimId: s.claim_id, score: s.overall, reasoning: s.reasoning })), tab: 'clean' } });
+
+    broadcast({ type: 'step', data: { step: 'complete', message: 'Evidence processed', tab: 'clean' } });
+  } catch (err: unknown) {
+    broadcast({ type: 'error', data: { message: err instanceof Error ? err.message : String(err), tab: 'clean' } });
+  }
+});
+
+// Simulated email for case dashboard
+app.post('/demo/clean/simulate-email', async (_req, res) => {
+  const emailContent = `From: Sarah Park <spark@apexventures.com>
+To: Jennifer Wu <jwu@parkwu.law>
+Subject: RE: Marcus Chen Investigation — Tax Evasion Discovery
+
+Jennifer,
+
+Following up on our forensic review. We discovered that Marcus Chen has been filing personal tax returns that do NOT report the $350,000 in payments from TechPartners Consulting LLC. The IRS Form 1099-MISC was never issued by TechPartners (because Chen controls both entities).
+
+Additionally, our IT team recovered deleted emails showing Chen communicated with a second shell company — "DataBridge Solutions LLC" — registered in Nevada under his wife's maiden name. We found two more invoices totaling $180,000 that we hadn't previously identified.
+
+This means the total embezzled amount is at least $530,000 across two shell companies and two victims, with potential tax fraud charges on top.
+
+Sarah Park
+CEO, Apex Ventures Inc.`;
+
+  // Reuse the custom evidence endpoint logic
+  const evidenceId = 'simulated-email-' + Date.now();
+  res.json({ ok: true, evidenceId });
+
+  broadcast({ type: 'step', data: { step: 'received', message: 'New email from Sarah Park (CEO)', evidence: { id: evidenceId, type: 'email', title: 'Sarah Park — Tax Evasion Discovery + Second Shell Company', source: 'Sarah Park <spark@apexventures.com>', content: emailContent }, tab: 'clean' } });
+
+  try {
+    const { context } = createContext('clean');
+    const { extract } = await import('./agents/evidence-extractor.js');
+    const { propose } = await import('./agents/claim-proposer.js');
+    const { score: scoreEvidence } = await import('./agents/claim-scorer.js');
+    const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+    broadcast({ type: 'step', data: { step: 'extracting', message: '[1/3] Extracting signals from Sarah Park email...', tab: 'clean' } });
+    const extractResult = await extract({ evidenceId, evidenceType: 'email', source: 'Sarah Park <spark@apexventures.com>', content: emailContent }, context) as { success: boolean; signal?: EvidenceItem };
+    if (!extractResult.success) throw new Error('Extraction failed');
+    broadcast({ type: 'step', data: { step: 'extracted', message: '[1/3] Complete', tab: 'clean' } });
+
+    await delay(3000);
+    broadcast({ type: 'step', data: { step: 'proposing', message: '[2/3] Analyzing against existing claims...', tab: 'clean' } });
+    const proposeResult = await propose({ evidenceId, rawContent: emailContent }, context) as { success: boolean; enrichments?: Array<{ claim_id: string; changes: string }>; proposals?: Array<Claim> };
+    if (!proposeResult.success) throw new Error('Proposal failed');
+    broadcast({ type: 'step', data: { step: 'proposed', message: '[2/3] Complete — ' + ((proposeResult.enrichments || []).length) + ' enrichments, ' + ((proposeResult.proposals || []).length) + ' new claims', enrichments: proposeResult.enrichments, proposals: (proposeResult.proposals || []).map(p => ({ id: p.id, title: p.title, status: p.status })), tab: 'clean' } });
+
+    await delay(3000);
+    broadcast({ type: 'step', data: { step: 'scoring', message: '[3/3] Scoring relevance...', tab: 'clean' } });
+    const scoreResult = await scoreEvidence({ evidenceId }, context) as { success: boolean; scoreRecord?: { scores: Array<{ claim_id: string; overall: number; reasoning: string }> } };
+    const scores = scoreResult.scoreRecord?.scores || [];
+    broadcast({ type: 'step', data: { step: 'scored', message: '[3/3] Complete', scores: scores.map(s => ({ claimId: s.claim_id, score: s.overall, reasoning: s.reasoning })), tab: 'clean' } });
+
+    broadcast({ type: 'step', data: { step: 'complete', message: 'Email processed — claims updated', tab: 'clean' } });
+  } catch (err: unknown) {
+    broadcast({ type: 'error', data: { message: err instanceof Error ? err.message : String(err), tab: 'clean' } });
+  }
+});
+
 // === DASHBOARD ===
 
 app.get('/dashboard', async (_req, res) => {
