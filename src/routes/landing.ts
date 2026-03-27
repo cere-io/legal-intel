@@ -628,6 +628,80 @@ footer { padding: 48px; border-top: 1px solid rgba(20,20,20,0.1); }
   </div>
 </section>
 
+<!-- DUAL STREAM VALIDATION -->
+<section id="dual-stream" style="padding:120px 48px;border-top:1px solid rgba(20,20,20,0.1)">
+  <div style="max-width:1400px;margin:0 auto">
+    <div class="split">
+      <div class="split-sticky">
+        <div class="micro-label reveal" style="margin-bottom:24px;color:rgba(20,20,20,0.5)">
+          <span class="pulse-dot"></span>
+          <span>Dual Stream Validation</span>
+        </div>
+        <h2 class="section-h2 reveal reveal-d1">
+          AI and attorneys evaluate<br>
+          <em>the same evidence.</em>
+        </h2>
+        <p class="reveal reveal-d2" style="font-size:14px;color:rgba(20,20,20,0.65);font-weight:400;line-height:1.7;margin-top:24px;max-width:360px">
+          Two independent streams. One shared truth. The AI extracts signals and scores claims. The attorney assesses impact and admissibility. Side-by-side comparison reveals where they converge &mdash; and where human judgment adds what AI cannot.
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:40px;padding-top:24px">
+        <div class="reveal">
+          <div class="horizontal-line" style="margin-bottom:24px"></div>
+          <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Independent Parallel Assessment</h3>
+          <p style="font-size:14px;color:rgba(20,20,20,0.65);font-weight:400;line-height:1.7">AI and attorneys evaluate the same evidence independently. Stream A extracts entities, scores claims, and detects cross-case impacts. Stream B captures attorney judgment: impact rating, admissibility, and strategic notes. Neither stream sees the other until comparison.</p>
+        </div>
+        <div class="reveal reveal-d1">
+          <div class="horizontal-line" style="margin-bottom:24px"></div>
+          <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Side-by-Side Comparison</h3>
+          <p style="font-size:14px;color:rgba(20,20,20,0.65);font-weight:400;line-height:1.7">When both streams complete, a comparison view reveals agreement percentage, delta indicators where scores diverge, and the specific signals each stream captured. AI excels at cross-case pattern detection. Attorneys add nuance on admissibility and strategic weight.</p>
+        </div>
+        <div class="reveal reveal-d2">
+          <div class="horizontal-line" style="margin-bottom:24px"></div>
+          <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Feedback-Driven Distillation</h3>
+          <p style="font-size:14px;color:rgba(20,20,20,0.65);font-weight:400;line-height:1.7">When an attorney confirms or overrides an AI score, the distillation agent adjusts claim weights. These weight shifts compound over time &mdash; the system learns how your firm practices law. Every assessment makes the next scoring cycle smarter.</p>
+        </div>
+        <div class="reveal reveal-d3">
+          <div class="horizontal-line" style="margin-bottom:24px"></div>
+          <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Per-Case Cryptographic Namespace</h3>
+          <p style="font-size:14px;color:rgba(20,20,20,0.65);font-weight:400;line-height:1.7">Each case gets its own cryptographic namespace with isolated encryption keys. Ethical walls enforced by math, not policy. Stream data from Case A is physically inaccessible from Case B &mdash; even to the AI itself.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual comparison mockup -->
+    <div class="reveal" style="margin-top:64px;display:grid;grid-template-columns:1fr 80px 1fr;gap:0;border:1px solid rgba(20,20,20,0.1);border-radius:16px;overflow:hidden">
+      <div style="padding:32px;background:rgba(90,138,138,0.04)">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(20,20,20,0.4);margin-bottom:16px">Stream A &mdash; AI Pipeline</div>
+        <div style="font-size:24px;font-weight:300;font-family:var(--font-serif);margin-bottom:16px;line-height:1.2">vivian-theft <span style="color:var(--color-accent)">0.95</span></div>
+        <div style="font-size:14px;color:rgba(20,20,20,0.55);line-height:1.7">
+          Entities extracted: 4<br>
+          Cross-case impacts: 3<br>
+          Confidence: 92%<br>
+          Processing time: 2.3s
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;background:rgba(20,20,20,0.03)">
+        <div style="text-align:center">
+          <div style="font-family:var(--font-serif);font-size:28px;font-weight:400;color:var(--color-accent)">94%</div>
+          <div style="font-size:8px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(20,20,20,0.4);margin-top:4px">Agreement</div>
+        </div>
+      </div>
+      <div style="padding:32px;background:rgba(196,122,74,0.04)">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(20,20,20,0.4);margin-bottom:16px">Stream B &mdash; Attorney</div>
+        <div style="font-size:24px;font-weight:300;font-family:var(--font-serif);margin-bottom:16px;line-height:1.2">Impact: <span style="color:var(--color-accent)">9/10</span></div>
+        <div style="font-size:14px;color:rgba(20,20,20,0.55);line-height:1.7">
+          Useful: Yes<br>
+          Admissible: Yes<br>
+          Priority: Critical<br>
+          Weight drift: +28.6%
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- PROOF -->
 <section id="proof" class="proof-section">
   <div class="proof-glow-1"></div>

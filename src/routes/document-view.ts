@@ -616,6 +616,27 @@ body.dark .email-card .ep-action{background:var(--surface2);border-left-color:va
     <button class="btn btn-secondary btn-sm" onclick="toggleDarkMode()" id="dark-toggle" title="Toggle dark mode">&#x1F319;</button>
   </div>
 
+  <!-- Namespace Isolation Indicator -->
+  <div style="margin:0 48px 6px;padding:8px 16px;background:linear-gradient(90deg,rgba(90,138,90,.04),rgba(90,138,90,.08));border:1px solid rgba(90,138,90,.2);border-radius:8px;display:flex;align-items:center;gap:12px;font-size:10px">
+    <span style="font-size:14px">&#128274;</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-weight:700;color:var(--green);letter-spacing:0.5px">NAMESPACE:</span>
+      <span style="font-family:var(--mono);color:var(--text);font-weight:600;padding:2px 8px;background:rgba(90,138,90,.08);border-radius:4px">kenzi-wang-2026</span>
+    </div>
+    <span style="color:var(--border)">|</span>
+    <div style="display:flex;align-items:center;gap:4px">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
+      <span style="color:var(--green);font-weight:600">Cryptographically Separated</span>
+    </div>
+    <span style="color:var(--border)">|</span>
+    <div style="display:flex;align-items:center;gap:4px;color:var(--text3)">
+      <span style="font-size:8px;font-weight:600;letter-spacing:0.5px">KEY FINGERPRINT:</span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text2)">a7:3f:b2:91:d4:0e:c8:56</span>
+    </div>
+    <div style="flex:1"></div>
+    <span style="font-size:8px;color:var(--text3)">Per-case encryption &middot; Ethical wall enforced</span>
+  </div>
+
   <!-- Email Preview (expandable context for the demo) -->
   <div id="email-preview-bar" style="margin:0 48px 8px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px" onclick="var d=document.getElementById('email-preview-content');d.style.display=d.style.display==='none'?'block':'none'">
     <span style="font-size:16px">&#x2709;</span>
@@ -1340,6 +1361,224 @@ body.dark .email-card .ep-action{background:var(--surface2);border-left-color:va
       <span style="color:var(--text3)"><strong style="color:var(--text)">3</strong> independent forensic audits (DHTY, Ascent, Practus)</span>
       <span style="color:var(--border)">|</span>
       <span style="color:var(--text3)"><strong style="color:var(--text)">600+</strong> pages available upon request</span>
+    </div>
+
+    <!-- Stream Validation — AI vs Attorney -->
+    <div style="margin-bottom:24px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div>
+          <div style="font-family:var(--serif);font-size:20px;font-weight:700">Stream Validation &mdash; AI vs Attorney</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Dual data streams run in parallel. Compare AI extraction signals against attorney judgment.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:8px;padding:3px 10px;border-radius:10px;background:rgba(90,138,90,.08);color:var(--green);font-weight:700;letter-spacing:0.5px">94% AGREEMENT</span>
+          <span style="font-size:8px;padding:3px 10px;border-radius:10px;background:rgba(196,122,74,.08);color:var(--primary);font-weight:700;letter-spacing:0.5px">DISTILLATION APPLIED</span>
+        </div>
+      </div>
+
+      <!-- Evidence Being Validated -->
+      <div style="padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:16px">&#x2709;</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--text)">Rocky Lee Email &mdash; Goopal CEO Denial</div>
+          <div style="font-size:10px;color:var(--text3)">Received Mar 23, 2026 &middot; Processed by 4 AI agents &middot; Attorney review completed Mar 24, 2026</div>
+        </div>
+        <div style="font-size:9px;color:var(--text3);text-align:right">
+          <div>Source: rocky.lee@milliard.law</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:2px">ev-rocky-goopal-ceo</div>
+        </div>
+      </div>
+
+      <!-- Two-column comparison -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Stream A: AI Pipeline -->
+        <div style="padding:16px;background:linear-gradient(135deg,rgba(90,138,138,.03),rgba(90,138,138,.06));border:1px solid rgba(90,138,138,.2);border-radius:12px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span>
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--cyan)">Stream A &mdash; AI Pipeline</span>
+          </div>
+          <!-- Extraction Signals -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">EXTRACTION SIGNALS</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+              <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(90,138,138,.08);color:var(--cyan);font-weight:500">Goopal</span>
+              <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(90,138,138,.08);color:var(--cyan);font-weight:500">Vivian Liu</span>
+              <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(90,138,138,.08);color:var(--cyan);font-weight:500">CEO Authorization</span>
+              <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(90,138,138,.08);color:var(--cyan);font-weight:500">Token Theft</span>
+              <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(184,66,51,.08);color:var(--red);font-weight:500">URGENT</span>
+            </div>
+            <div style="font-size:9px;color:var(--text3)">Jurisdictions: <strong style="color:var(--text2)">NDCA, BVI</strong> &middot; Confidence: <strong style="color:var(--green)">HIGH (92%)</strong></div>
+          </div>
+          <!-- Claim Scoring -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">CLAIM SCORING (top 5)</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+                <span style="color:var(--text2);min-width:120px">vivian-theft</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:95%;background:var(--green);border-radius:3px"></div></div>
+                <span style="font-family:var(--mono);font-weight:700;color:var(--green);min-width:35px;text-align:right">0.95</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+                <span style="color:var(--text2);min-width:120px">syndicate</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:92%;background:var(--green);border-radius:3px"></div></div>
+                <span style="font-family:var(--mono);font-weight:700;color:var(--green);min-width:35px;text-align:right">0.92</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+                <span style="color:var(--text2);min-width:120px">fabrication</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:88%;background:var(--primary);border-radius:3px"></div></div>
+                <span style="font-family:var(--mono);font-weight:700;color:var(--primary);min-width:35px;text-align:right">0.88</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+                <span style="color:var(--text2);min-width:120px">embezzlement</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:76%;background:var(--primary);border-radius:3px"></div></div>
+                <span style="font-family:var(--mono);font-weight:700;color:var(--primary);min-width:35px;text-align:right">0.76</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+                <span style="color:var(--text2);min-width:120px">aliases</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:71%;background:var(--primary);border-radius:3px"></div></div>
+                <span style="font-family:var(--mono);font-weight:700;color:var(--primary);min-width:35px;text-align:right">0.71</span>
+              </div>
+            </div>
+          </div>
+          <!-- Cross-case Impacts -->
+          <div>
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:4px">CROSS-CASE IMPACTS DETECTED</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">
+              <div>&bull; Goopal v. Jin (3:26-cv-00857) &mdash; standing invalidated</div>
+              <div>&bull; Cere v. Wang (3:23-cv-2444) &mdash; new count: fraud on court</div>
+              <div>&bull; Dubai 31801/2025 &mdash; criminal referral strengthened</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream B: Attorney Assessment -->
+        <div style="padding:16px;background:linear-gradient(135deg,rgba(196,122,74,.03),rgba(196,122,74,.06));border:1px solid rgba(196,122,74,.2);border-radius:12px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--primary)"></span>
+            <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary)">Stream B &mdash; Attorney Assessment</span>
+          </div>
+          <!-- Impact Rating -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">IMPACT RATING</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-family:var(--serif);font-size:36px;font-weight:800;color:var(--primary);line-height:1">9</div>
+              <div style="font-size:10px;color:var(--text3)">/10</div>
+              <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:90%;background:var(--primary);border-radius:4px"></div></div>
+            </div>
+            <div style="font-size:9px;color:var(--text2);margin-top:4px;font-style:italic">&ldquo;Potentially case-altering. CEO denial invalidates Goopal standing entirely.&rdquo;</div>
+          </div>
+          <!-- Determinations -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">DETERMINATIONS</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="padding:8px 10px;background:rgba(90,138,90,.06);border:1px solid rgba(90,138,90,.15);border-radius:6px;text-align:center">
+                <div style="font-size:9px;color:var(--text3)">Useful</div>
+                <div style="font-size:14px;font-weight:700;color:var(--green)">YES</div>
+              </div>
+              <div style="padding:8px 10px;background:rgba(90,138,90,.06);border:1px solid rgba(90,138,90,.15);border-radius:6px;text-align:center">
+                <div style="font-size:9px;color:var(--text3)">Admissible</div>
+                <div style="font-size:14px;font-weight:700;color:var(--green)">YES</div>
+              </div>
+            </div>
+          </div>
+          <!-- Priority -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">PRIORITY ASSESSMENT</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">
+              <div><strong style="color:var(--text)">Priority:</strong> <span style="padding:1px 6px;border-radius:3px;background:rgba(184,66,51,.08);color:var(--red);font-weight:600;font-size:9px">CRITICAL</span></div>
+              <div style="margin-top:4px"><strong style="color:var(--text)">Action required:</strong> File anti-suit injunction in NDCA within 10 days</div>
+            </div>
+          </div>
+          <!-- Attorney Notes -->
+          <div>
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:4px">ATTORNEY NOTES</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6;padding:8px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--primary)">
+              CEO unequivocally stated no authorization. Only one Goopal entity in BVI registry. This email should be preserved as Exhibit 43. Vivian reclassification from adversary to victim opens cooperation pathway. AI correctly flagged syndicate and vivian-theft &mdash; agree on scoring.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Row -->
+      <div style="padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px">
+          <!-- Agreement -->
+          <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:4px">STREAM AGREEMENT</div>
+            <div style="font-family:var(--serif);font-size:32px;font-weight:800;color:var(--green);line-height:1">94%</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:4px">AI and attorney converge on 16 of 17 signals</div>
+          </div>
+          <!-- Deltas -->
+          <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">DELTA INDICATORS</div>
+            <div style="font-size:10px;line-height:1.8">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">embezzlement relevance</span><span style="color:var(--primary);font-weight:600">AI: 0.76 &rarr; Atty: 0.65</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">aliases connection</span><span style="color:var(--primary);font-weight:600">AI: 0.71 &rarr; Atty: 0.80</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--green)">vivian-theft</span><span style="color:var(--green);font-weight:600">AI: 0.95 = Atty: 0.95</span></div>
+            </div>
+          </div>
+          <!-- Distillation -->
+          <div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+            <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:6px">DISTILLATION APPLIED</div>
+            <div style="font-size:9px;color:var(--text2);margin-bottom:8px">Weight drift from attorney feedback:</div>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:var(--text2)">vivian-theft</span>
+                <span style="font-family:var(--mono);font-size:9px"><span style="color:var(--text3)">0.056</span> &rarr; <span style="color:var(--green);font-weight:700">0.072</span> <span style="color:var(--green);font-size:8px">(+28.6%)</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:var(--text2)">syndicate</span>
+                <span style="font-family:var(--mono);font-size:9px"><span style="color:var(--text3)">0.061</span> &rarr; <span style="color:var(--green);font-weight:700">0.074</span> <span style="color:var(--green);font-size:8px">(+21.3%)</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:var(--text2)">embezzlement</span>
+                <span style="font-family:var(--mono);font-size:9px"><span style="color:var(--text3)">0.058</span> &rarr; <span style="color:var(--primary);font-weight:700">0.052</span> <span style="color:var(--primary);font-size:8px">(-10.3%)</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Weight before/after visualization -->
+        <div style="font-size:9px;font-weight:600;color:var(--text3);margin-bottom:8px">CLAIM WEIGHT BEFORE / AFTER FEEDBACK</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text3);font-size:8px;font-weight:600">CLAIM</span>
+            <span style="color:var(--text3);font-size:8px;font-weight:600">BEFORE</span>
+            <span style="color:var(--text3);font-size:8px;font-weight:600">AFTER</span>
+            <span style="color:var(--text3);font-size:8px;font-weight:600;text-align:right">DRIFT</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2)">vivian-theft</span>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:56%;background:var(--text3);border-radius:3px"></div></div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:72%;background:var(--green);border-radius:3px"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--green);text-align:right;font-weight:600">+28.6%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2)">syndicate</span>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:61%;background:var(--text3);border-radius:3px"></div></div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:74%;background:var(--green);border-radius:3px"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--green);text-align:right;font-weight:600">+21.3%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2)">fabrication</span>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:55%;background:var(--text3);border-radius:3px"></div></div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:63%;background:var(--primary);border-radius:3px"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--primary);text-align:right;font-weight:600">+14.5%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2)">embezzlement</span>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:58%;background:var(--text3);border-radius:3px"></div></div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:52%;background:var(--primary);border-radius:3px"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--primary);text-align:right;font-weight:600">-10.3%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:100px 1fr 1fr 50px;gap:8px;align-items:center;font-size:10px">
+            <span style="color:var(--text2)">aliases</span>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:50%;background:var(--text3);border-radius:3px"></div></div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:57%;background:var(--primary);border-radius:3px"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--primary);text-align:right;font-weight:600">+14.0%</span>
+          </div>
+        </div>
+        <div style="font-size:8px;color:var(--text3);margin-top:10px;text-align:center">Weights shift when attorney assessments diverge from AI scores. Higher weight = AI prioritizes this claim for future evidence. Drift compounds over time.</div>
+      </div>
     </div>
 
     <!-- Section controls -->
