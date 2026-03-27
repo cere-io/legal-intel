@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath as _ftu } from 'url';
 import { query } from './db/connection.js';
 import { initRuntime, dumpCubbies, getCubbyTree, getCubby, resetCubbies, getCubbyHistory, createContext, clearCleanCache } from './runtime.js';
 import { handle as conciergeHandle } from './agents/concierge.js';
@@ -15,11 +15,14 @@ import { renderCleanCaseView } from './routes/clean-case-view.js';
 import { mainGraph, claimGraph } from './routes/graphs-api.js';
 import type { Event, Claim, EvidenceItem, LegalCase, ClaimWeights, SSEEvent } from './types/index.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// CJS (Vercel serverless): __dirname is available
+// ESM (tsx local dev): __dirname is shimmed by tsx
+// @ts-ignore — __dirname exists in both environments we target
+const _dirname: string = typeof __dirname !== 'undefined' ? __dirname : path.dirname(_ftu(eval('import.meta.url')));
 const app = express();
 app.use(express.json());
-app.use('/static', express.static(path.join(__dirname, 'routes')));
-app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+app.use('/static', express.static(path.join(_dirname, 'routes')));
+app.use('/assets', express.static(path.join(_dirname, '..', 'public')));
 
 // === LANDING PAGE ===
 app.get('/', renderLanding);
@@ -244,7 +247,7 @@ app.post('/api/feedback', async (req, res) => {
 app.post('/demo/reset', async (_req, res) => {
   // Re-run seed
   const fs = await import('fs');
-  const schemaPath = new URL('db/schema.sql', import.meta.url);
+  const schemaPath = path.join(_dirname, 'db', 'schema.sql');
   const schema = fs.readFileSync(schemaPath, 'utf-8');
   await query(schema);
   // Re-seed
@@ -1106,11 +1109,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 // === START ===
 const PORT = process.env.PORT || 3001;
 
-async function start() {
-  await initRuntime();
-  app.listen(PORT, () => {
-    console.log('CLAIM INTELLIGENCE ENGINE running on http://localhost:' + PORT + '/dashboard');
-  });
+// Init runtime on first request for serverless, eagerly for local dev
+let _initPromise: Promise<void> | null = null;
+function ensureInit() {
+  if (!_initPromise) _initPromise = initRuntime();
+  return _initPromise;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Middleware: ensure runtime is initialized before handling requests
+app.use(async (_req, _res, next) => { await ensureInit(); next(); });
+
+// Export for Vercel serverless
+export default app;
+
+// Local dev: start server
+if (!process.env.VERCEL) {
+  ensureInit().then(() => {
+    app.listen(PORT, () => {
+      console.log('CLAIM INTELLIGENCE ENGINE running on http://localhost:' + PORT + '/dashboard');
+    });
+  }).catch(err => { console.error(err); process.exit(1); });
+}
